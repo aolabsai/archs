@@ -6,12 +6,6 @@
 
 
 
-import json
-
-arch_string= json.dumps("""
-
-
-
 arch_note = "Netbox device type relational autocomplete (10 binary digits per field to encode ids)"
 arch = ao.Arch(arch_note)
 
@@ -136,5 +130,3 @@ def full_conn():
 arch.full_conn = full_conn
 
 arch.full_conn()
-
-""")
