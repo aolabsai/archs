@@ -48,7 +48,7 @@ arch.Q[0] = np.arange(3, 6)
 arch.Z[0] = np.arange(6, 7)
 arch.C[0] = np.arange(7, 11)
 arch.IQZC = np.arange(arch.n_total)
-arch.IQZ = np.arange(arch.n_total - arch.c)
+arch.IQZ = np.arange(arch.n_total - sum(arch.c))
 
 arch.I__flat = np.concatenate(arch.I, axis=None).ravel() 
 arch.Q__flat = np.concatenate(arch.Q, axis=None).ravel() 
