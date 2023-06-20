@@ -105,6 +105,7 @@ arch.C__flat_command= np.array([7, 8, 9])
 arch.C__flat_pleasure= np.array([7, 8, 10])
 arch.C__flat_pain= np.array([9])
 
+arch.hasInstincts = True
 
 def c0_instinct_rule(INPUT, Agent):
 
