@@ -6,11 +6,44 @@ Created on Thu Jul 14 00:37:29 2022
 """
 
 # AO Labs Modules
+# modified import to import ao_core 
+import sys
+sys.path.append('/home/shane/Development/Animo-Omnis')
 import ao_core as ao
 
 # 3rd Party Modules
 import numpy as np
 import streamlit as st
+
+#api requests
+import requests
+
+#using preset api key for now
+api_key = 'buildBottomUpRealAGI'
+st.session_state.api_key = api_key
+
+def agent_api_call(agent_id, input_dat, api_key, label=None):
+    url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel/agent"
+
+    payload = {
+        "kennel_id": "v0dev/TEST-Netbox_DeviceDiscovery",
+        "agent_id": agent_id,
+        "INPUT": input_dat,
+        "control": {
+            "US": True
+        }
+    }
+    if label != None:
+        payload["LABEL"] = label
+
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "X-API-KEY": api_key
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    return response
 
 
 # Application-Specific Modules
@@ -46,9 +79,11 @@ st.write("")
 st.markdown("## Add Your Netbox Account")
 st.markdown("Please enter the information below and then click the **Add Netbox Account** button to get started with this demo.")
 
-st.session_state.nb_USER_url = st.text_input('Enter your Netbox account URL:')
+# st.session_state.nb_USER_url = st.text_input('Enter your Netbox account URL:')
+st.session_state.nb_USER_url = st.text_input('Enter your Netbox account URL:', "https://demo.netbox.dev/")
 st.session_state.nb_USER_api_token = st.text_input('Enter your Netbox account API token:')
 st.session_state.USER_num_test_devices = st.number_input('How many of the devices in this Netbox account would you like to use to test this new Device Discovery Augmentation service?' , 0, 30)
+st.session_state.agent_id = st.text_input('enter the id of your agent')
 
 
 def New_NB_ACCOUNT_Callback():
@@ -61,11 +96,96 @@ def New_NB_ACCOUNT_Callback():
         threading=True,
     )
     devices = list(nb.dcim.devices.all())
-    
-    
-    test_devices_in = np.random.choice(len(devices), st.session_state.USER_num_test_devices, replace=False)
-    train_devices_in = np.delete( np.arange(len(devices)), test_devices_in)
 
+    #dictionary comprehensions that map ids to strings
+    # dict_manufacturer = {d.device_type.manufacturer.id:d.device_type.manufacturer for d in devices}
+    # dict_device_type = {d.device_type.id:d.device_type for d in devices}
+    # dict_sites = {d.sites.id:d.site for d in devices}
+    manufacturers = {}
+    device_types = {}
+    sites = {}
+    roles = {}
+    for d in devices:
+        manufacturers[d.device_type.manufacturer.id] = d.device_type.manufacturer.__str__()
+        device_types[d.device_type.id] = d.device_type.__str__()
+        sites[d.site.id] = d.site.__str__()
+        roles[d.device_role.id] = d.device_role.__str__()
+    
+    st.session_state.manufacturers = manufacturers
+    st.session_state.device_types = device_types
+    st.session_state.sites = sites
+    st.session_state.roles = roles
+
+    
+    
+    
+    # test_devices_in = np.random.choice(len(devices), st.session_state.USER_num_test_devices, replace=False)
+    # test_devices_in = np.random.choice(devices, st.session_state.USER_num_test_devices, replace=False)
+    # train_devices_in = np.delete( np.arange(len(devices)), test_devices_in)
+    # train_devices_in = np.setdiff1d(devices, test_devices_in)
+    # choices = np.random.choice(len(devices), st.session_state.USER_num_test_devices, replace=False)
+    # print(choices)
+    # test_devices_in = np.copy(devices[choices])
+    # train_devices_in = np.delete(devices, choices)
+    test_size = st.session_state.USER_num_test_devices
+    np.random.shuffle(devices)
+    test_devices_in = devices[:test_size]
+    train_devices_in = devices[test_size:]
+
+    st.session_state.test_devices_in = test_devices_in
+    
+
+    # print(devices[0])
+    # call API in a loop for all TRAIN devices with labels 
+    count = 0
+    for d in train_devices_in:
+        INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
+        # TypeError: unsupported format string passed to DeviceTypes.__format__
+        LABEL = format(d.device_role.id, '010b')
+
+        # call API
+        response = agent_api_call(st.session_state.agent_id, INPUT, api_key, label=LABEL)
+
+        print("trained on device {} with status code {}".format(count, response))
+        count += 1
+    
+    # display training is DONE message
+    st.markdown('# Training done')
+    # prompt click from user to move along (to next page or a button appears on for loop completion appears)
+
+    # call API in loop for all TEST devices WITHOUT LABELS
+        # similar to above
+        
+    test_devices_out = np.arange(len(train_devices_in))
+    correct_count = 0
+    for i in range(len(test_devices_in)):
+        d = test_devices_in[i]
+    # for d in test_devices_in:
+        INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
+        response = agent_api_call(st.session_state.agent_id, INPUT, api_key)
+        story = response.json()['story']
+        np.append(test_devices_out, story)
+
+        expected = format(d.device_role.id, '010b')
+        if expected == story:
+            correct_count += 1
+
+    # save accuracy and other info in session to display to netbox visitor
+    st.session_state.correct_count = correct_count
+    
+    # make it all look pretty and explainable
+    st.markdown('# predicted correctly for {count}/{total}'.format(count=correct_count, total=st.session_state.USER_num_test_devices))
+    st.markdown('# which is an accuracy of {}%'.format((correct_count/st.session_state.USER_num_test_devices)*100))
+    #table of devices, correct labels, and guessed labels?
+
+    # prompt visitor to clone this app and associated agent
+    
+    ## next up
+    # add history vibility
+        # raw and per neuron, see how it's displayed in basic clam demo app
+    
+    ## bonus
+    # add new devices, on click of button, re-trains agent
 
 #%%
 def deviceToIO(d):
@@ -82,34 +202,8 @@ def deviceToIO(d):
         'roleBin': format(d.device_role.id, '010b'),
     }
     return info
+
 #%%
-    
-    # call API in a loop for all TRAIN devices with labels 
-    for d in train_devices_in:
-        INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type, '010b') + format(d.site.id, '010b')
-        LABEL = format(d.device_role.id, '010b')
-
-        # call API        
-    
-        # display training is DONE message
-        
-        # prompt click from user to move along (to next page or a button appears on for loop completion appears)
-
-    # call API in loop for all TEST devices WITHOUT LABELS
-        # similar to above
-            
-    # save accuracy and other info in session to display to netbox visitor
-    
-    # make it all look pretty and explainable
-    
-    # prompt visitor to clone this app and associated agent
-    
-    ## next up
-    # add history vibility
-        # raw and per neuron, see how it's displayed in basic clam demo app
-    
-    ## bonus
-    # add new devices, on click of button, re-trains agent
         
     
     arraySize = 10
