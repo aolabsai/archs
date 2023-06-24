@@ -13,7 +13,7 @@ Created on Sun Apr  9 01:47:11 2023
 import streamlit as st
 import pandas as pd
 
-from netbox_ai_app.main_netbox import decimalToBinaryList, binaryListToDecimal
+# from netbox_ai_app.main_netbox import decimalToBinaryList, binaryListToDecimal
 
 if 'nbd' not in st.session_state: st.text("You have to connect your Netbox account first.")
 else:

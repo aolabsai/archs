@@ -13,7 +13,9 @@ import numpy as np
 import streamlit as st
 import pandas as pd
 
-from netbox_ai_app.main_netbox import binaryListToDecimal
+# from netbox_ai_app.main_netbox import binaryListToDecimal
+
+#show results button from first page?
 
 
 if 'nbd' not in st.session_state: st.text("You have to connect your Netbox account first.")
