@@ -105,12 +105,17 @@ def New_NB_ACCOUNT_Callback():
     device_types = {}
     sites = {}
     roles = {}
+    
+    
     for d in devices:
+    # for i in range(len(devices)):
+    #     d = devices[i]
         manufacturers[d.device_type.manufacturer.id] = d.device_type.manufacturer.__str__()
         device_types[d.device_type.id] = d.device_type.__str__()
         sites[d.site.id] = d.site.__str__()
         roles[d.device_role.id] = d.device_role.__str__()
     
+    #save dictionaries to session_state
     st.session_state.manufacturers = manufacturers
     st.session_state.device_types = device_types
     st.session_state.sites = sites
@@ -136,8 +141,9 @@ def New_NB_ACCOUNT_Callback():
     
 
     # print(devices[0])
-    # call API in a loop for all TRAIN devices with labels 
+    # call API in a loop for all TRAIN devices with labels
     count = 0
+    prog_bar = st.progress(0, text="Training Progress")
     for d in train_devices_in:
         INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
         # TypeError: unsupported format string passed to DeviceTypes.__format__
@@ -148,34 +154,35 @@ def New_NB_ACCOUNT_Callback():
 
         print("trained on device {} with status code {}".format(count, response))
         count += 1
-    
+        prog_bar.progress(float(count)/len(train_devices_in), text='Training Progress')
+
     # display training is DONE message
-    st.markdown('# Training done')
+    st.write('Training done')
     # prompt click from user to move along (to next page or a button appears on for loop completion appears)
 
     # call API in loop for all TEST devices WITHOUT LABELS
         # similar to above
         
-    test_devices_out = np.arange(len(train_devices_in))
-    correct_count = 0
-    for i in range(len(test_devices_in)):
-        d = test_devices_in[i]
+    # test_devices_out = np.arange(len(train_devices_in))
+    # correct_count = 0
+    # for i in range(len(test_devices_in)):
+    #     d = test_devices_in[i]
     # for d in test_devices_in:
-        INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
-        response = agent_api_call(st.session_state.agent_id, INPUT, api_key)
-        story = response.json()['story']
-        np.append(test_devices_out, story)
+        # INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
+        # response = agent_api_call(st.session_state.agent_id, INPUT, api_key)
+        # story = response.json()['story']
+        # np.append(test_devices_out, story)
 
-        expected = format(d.device_role.id, '010b')
-        if expected == story:
-            correct_count += 1
+        # expected = format(d.device_role.id, '010b')
+        # if expected == story:
+        #     correct_count += 1
 
     # save accuracy and other info in session to display to netbox visitor
-    st.session_state.correct_count = correct_count
+    # st.session_state.correct_count = correct_count
     
     # make it all look pretty and explainable
-    st.markdown('# predicted correctly for {count}/{total}'.format(count=correct_count, total=st.session_state.USER_num_test_devices))
-    st.markdown('# which is an accuracy of {}%'.format((correct_count/st.session_state.USER_num_test_devices)*100))
+    # st.markdown('# predicted correctly for {count}/{total}'.format(count=correct_count, total=st.session_state.USER_num_test_devices))
+    # st.markdown('# which is an accuracy of {}%'.format((correct_count/st.session_state.USER_num_test_devices)*100))
     #table of devices, correct labels, and guessed labels?
 
     # prompt visitor to clone this app and associated agent
