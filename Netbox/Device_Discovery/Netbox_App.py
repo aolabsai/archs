@@ -126,7 +126,7 @@ if st.button("Add Netbox Account & Train Agent", type="primary"):
         prog_bar.progress(float(count)/len(train_devices_in), text='Training Progress')
 
     # display training is DONE message
-    prog_bar.progress(1.0, text'Training Done')
+    prog_bar.progress(1.0, text='Training Done')
     st.write('Training done')
     
     

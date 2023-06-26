@@ -31,15 +31,13 @@ def Batch_New_Devices_Callback():
         print(response)
         story = response.json()['story']
         st.session_state.predicted_roles[i] = int(story, 2)
-        # np.append(test_devices_out, story)
         expected = d.device_role.id
-        # expected = format(d.device_role.id, '010b')
         if expected == int(story, 2):
             correct_count += 1
         elif st.session_state.predicted_roles[i] not in roles:
             missing_count += 1
         prog_bar.progress(float(i)/len(test_devices), text='Testing Progress')
-    prog_bar.progress(100, 'Training Done')
+    prog_bar.progress(100, text='Testing Done')
     
     st.session_state.correct_count = correct_count
     st.session_state.missing_count = missing_count
@@ -69,21 +67,22 @@ else:
 
     
    
-    st.button("Add this batch of new (test) devices", on_click= Batch_New_Devices_Callback)
+    st.button("Add this batch of new (test) devices", on_click= Batch_New_Devices_Callback, type="primary")
     
     devices = np.zeros([len(test_devices), 6], dtype='O')
 #     print(devices)
-    devices[:, 0] = np.array([d.__str__() for d in test_devices]) 
-    devices[:, 1] = np.array([manufacturers[d.device_type.manufacturer.id] for d in test_devices])
-    devices[:, 2] = np.array([sites[d.site.id] for d in test_devices])
-    devices[:, 3] = np.array([types[d.device_type.id] for d in test_devices])
-    if 'predicted_roles' not in st.session_state:
-        devices[:, 4] = ""
-    else:
-        devices[:, 4] = np.array([roles[r] for r in st.session_state.predicted_roles])
-    devices[:, 5] = np.array([roles[d.device_role.id] for d in test_devices])
-    print(devices)
-    print(test_devices)
+    for i in range(len(test_devices)):
+        d = test_devices[i]
+        devices[i, 0] = d.__str__()
+        devices[i, 1] = manufacturers[d.device_type.manufacturer.id]
+        devices[i, 2] = sites[d.site.id]
+        devices[i, 3] = types[d.device_type.id]
+        if 'predicted_roles' not in st.session_state:
+            devices[i, 4] = ""
+        else:
+            devices[i, 4] = roles[st.session_state.predicted_roles[i]]
+        devices[i, 5] = roles[d.device_role.id]
+    
 
     devices_df = pd.DataFrame( devices, columns=['Name', 'Manufacturer', 'Site', 'Type', 'PREDICTED ROLE', 'EXPECTED ROLE'])
     
