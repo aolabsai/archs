@@ -12,56 +12,88 @@ import streamlit as st
 import pandas as pd
 
 
-if 'nb_account_added' not in st.session_state: st.text("You have to connect your Netbox account first.")
-else:
+# from netbox_ai_app.main_netbox import binaryListToDecimal
+from Netbox_App import agent_api_call
 
-# variables loaded from st.session_state (client session)#####################
-#########
-    USER_num_test_devices = st.session_state.USER_num_test_devices
-    test_devices_in =       st.session_state.test_devices_in
-    test_devices_out_roles= st.session_state.test_devices_out_roles    
+#show results button from first page?
+def Batch_New_Devices_Callback():
+    #run agent on test data
+    i=0
     
-    correct_count = st.session_state.correct_count
-    noguess_count = st.session_state.noguess_count
-#########
+    st.session_state.predicted_roles = np.zeros(len(test_devices), dtype=int)
+    correct_count = 0
+    missing_count = 0
+    prog_bar = st.progress(0, text="Testing Progress")
+    for i in range(len(test_devices)):
+        d = test_devices[i]
+        INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
+        response = agent_api_call(st.session_state.agent_id, INPUT, st.session_state.api_key)
+        print(response)
+        story = response.json()['story']
+        st.session_state.predicted_roles[i] = int(story, 2)
+        # np.append(test_devices_out, story)
+        expected = d.device_role.id
+        # expected = format(d.device_role.id, '010b')
+        if expected == int(story, 2):
+            correct_count += 1
+        elif st.session_state.predicted_roles[i] not in roles:
+            missing_count += 1
+        prog_bar.progress(float(i)/len(test_devices), text='Testing Progress')
+    prog_bar.progress(100, 'Training Done')
+    
+    st.session_state.correct_count = correct_count
+    st.session_state.missing_count = missing_count
 
+if 'test_devices_in' not in st.session_state: st.text("You have to connect your Netbox account first.")
 
-    # app front end
+else:
+    # load session data
+    manufacturers = st.session_state.manufacturers
+    roles = st.session_state.roles
+    sites = st.session_state.sites
+    types = st.session_state.device_types
+    
+
+    api_key = st.session_state.api_key
+
+    test_devices = st.session_state.test_devices_in
+    agent_id = st.session_state.agent_id
+
+    
+    
     st.title('Netbox Demo - powered by aolabs.ai')
     st.write("")
     st.markdown("## Programmatically Add New Devices")
+    
+    
 
     
-    # create device_discovery to contain table of results
-    if st.session_state.device_discovery is False:
-        device_discovery = np.zeros([USER_num_test_devices, 6], dtype="O")
-        i= 0    
-        for d in test_devices_in:
-            device_discovery[i, 0] = d.__str__()                           # name
-            device_discovery[i, 1] = d.device_type.manufacturer.__str__()  # manufacturer
-            device_discovery[i, 2] = d.device_type.__str__()               # device type
-            device_discovery[i, 3] = d.site.__str__()                      # site 
-            device_discovery[i, 4] = ""                          # PREDICTED role
-            device_discovery[i, 5] = d.device_role.__str__()               # role, actual
-            i += 1
-########   Save it to st.session_state
-        st.session_state.device_discovery = device_discovery
+   
+    st.button("Add this batch of new (test) devices", on_click= Batch_New_Devices_Callback)
     
-        
-    # On USER click, return results from st.session_state from the main app page    
-    if st.button("Add this batch of new devices (i.e. run/view test)", key="view_results", type="primary"):
+    devices = np.zeros([len(test_devices), 6], dtype='O')
+#     print(devices)
+    devices[:, 0] = np.array([d.__str__() for d in test_devices]) 
+    devices[:, 1] = np.array([manufacturers[d.device_type.manufacturer.id] for d in test_devices])
+    devices[:, 2] = np.array([sites[d.site.id] for d in test_devices])
+    devices[:, 3] = np.array([types[d.device_type.id] for d in test_devices])
+    if 'predicted_roles' not in st.session_state:
+        devices[:, 4] = ""
+    else:
+        devices[:, 4] = np.array([roles[r] for r in st.session_state.predicted_roles])
+    devices[:, 5] = np.array([roles[d.device_role.id] for d in test_devices])
+    print(devices)
+    print(test_devices)
+
+    devices_df = pd.DataFrame( devices, columns=['Name', 'Manufacturer', 'Site', 'Type', 'PREDICTED ROLE', 'EXPECTED ROLE'])
     
-        # Add results to 5th column, PREDICTED ROLE
-        st.session_state.device_discovery[:, 4] = st.session_state.test_devices_out_roles
-        
-        # Display % accuracy + no guesses and other info
-        correct_percentage =   ( correct_count / USER_num_test_devices ) * 100
-        noguess_percentage = ( noguess_count / USER_num_test_devices ) * 100
-        
-        st.write("Out of "+str(USER_num_test_devices)+" devices added, the role was predicted correctly "+str(correct_count)+" times out of "+str(USER_num_test_devices)+".")
+    st.table(devices_df)
+    
+    if 'correct_count' in st.session_state:
+        correct_percentage = (st.session_state.correct_count/len(test_devices))*100
+        missing_percentage = (st.session_state.missing_count/len(test_devices))*100
+
+        st.write("Out of "+str(len(test_devices))+" devices added, the role was predicted correctly "+str(st.session_state.correct_count)+" times out of "+str(len(test_devices))+".")
         st.write("Or "+str(correct_percentage)+" %.")
-        st.write("Also, there were no predictions "+str(noguess_count)+" times, or "+str(noguess_percentage)+" %.")
+        st.write("Also, there were no predictions "+str(st.session_state.missing_count)+" times, or "+str(missing_percentage)+" %.")   
 
-    # use pandas dataframe + streamlit to display results for USER
-    device_discovery_df = pd.DataFrame( st.session_state.device_discovery, columns=['Name', 'Manufacturer', 'Type', 'Site', 'PREDICTED ROLE', 'Role'])        
-    st.write(device_discovery_df)

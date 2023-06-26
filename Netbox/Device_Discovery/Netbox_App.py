@@ -80,24 +80,38 @@ if st.button("Add Netbox Account & Train Agent", type="primary"):
         token= str(st.session_state.nb_USER_api_token),
         threading=True,
     )
-    devices = list(nb.dcim.devices.all())[0: st.session_state.USER_num_total_devices ]
 
-    #dictionary comprehensions that map ids to strings, for device name, mfg, type, site, and role
-    st.session_state.device_ids    = {d.id : d.__str__() for d in devices}    #  to map device id to device name
-    st.session_state.manufacturers = {d.device_type.manufacturer.id : d.device_type.manufacturer.__str__() for d in devices}
-    st.session_state.device_types  = {d.device_type.id : d.device_type.__str__() for d in devices}
-    st.session_state.sites         = {d.site.id : d.site.__str__() for d in devices}
-    st.session_state.device_roles  = {d.device_role.id : d.device_role.__str__() for d in devices}
-        
-    # for demo performance snapshot, seperate into training and testing sets
+    devices = list(nb.dcim.devices.all())
+
+    manufacturers = {}
+    device_types = {}
+    sites = {}
+    roles = {}
+    
+    #doing this in a single loop should be more efficient than dictionary comprehensions
+    for d in devices:
+        manufacturers[d.device_type.manufacturer.id] = d.device_type.manufacturer.__str__()
+        device_types[d.device_type.id] = d.device_type.__str__()
+        sites[d.site.id] = d.site.__str__()
+        roles[d.device_role.id] = d.device_role.__str__()
+    
+    #save dictionaries to session_state
+    st.session_state.manufacturers = manufacturers
+    st.session_state.device_types = device_types
+    st.session_state.sites = sites
+    st.session_state.roles = roles
+
+    
+    
+    
     test_size = st.session_state.USER_num_test_devices
     np.random.shuffle(devices)
     test_devices_in = devices[:test_size]
     train_devices_in = devices[test_size:]
     st.session_state.test_devices_in = test_devices_in
     
-    # call API in a loop for all TRAIN devices with labels 
     count = 0
+    prog_bar = st.progress(0, text="Training Progress")
     for d in train_devices_in:
         INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
         LABEL = format(d.device_role.id, '010b')
@@ -107,39 +121,17 @@ if st.button("Add Netbox Account & Train Agent", type="primary"):
 
         print("trained on device {} with status code {}".format(count, response))
         count += 1
+        
+
+        prog_bar.progress(float(count)/len(train_devices_in), text='Training Progress')
+
+    # display training is DONE message
+    prog_bar.progress(1.0, text'Training Done')
+    st.write('Training done')
     
-    # call API in loop for all TEST devices WITHOUT LABELS
-    test_devices_out_roles = list(range(len(test_devices_in)))
-    correct_count = 0
-    noguess_count = 0
-    for i in list(range(len(test_devices_in))):
-        d = test_devices_in[i]
-        INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
-
-        # call API
-        response = agent_api_call(st.session_state.agent_id, INPUT, api_key)
-        story = response.json()['story']
-
-        expected = format(d.device_role.id, '010b')
-        if expected == story:
-            correct_count += 1
-        # to convert binary output of Agent back to role ID and, via the role dict, the role name
-        try: 
-            test_devices_out_roles[i] = st.session_state.device_roles[int(story, 2)]
-        except KeyError:  # if role ID guessed by Agent does not exist
-            test_devices_out_roles[i] = "NO GUESS"
-            noguess_count += 1    
-
-    # save accuracy and other info in session to display to netbox visitor
-    st.session_state.test_devices_out_roles = test_devices_out_roles
-    st.session_state.correct_count = correct_count
-    st.session_state.noguess_count = noguess_count
-
-    st.markdown('# Training done')
+    
     
     # Note to Shane -- couldn't get the 2 markdowns below to work, please double chjeck and complete design of this area
-#    st.markdown('# predicted correctly for {count}/{total}'.format(count=correct_count, total=st.session_state.USER_num_test_devices))
-#    st.markdown('# which is an accuracy of {}%'.format((correct_count/st.session_state.USER_num_test_devices)*100))
     #table of devices, correct labels, and guessed labels? -- Note to Shane -- yes, plus the device mfg, type, and site; see "device_discovery" object in page 2
      # so redesign all the below, all the front end elements       
     st.write("Data successfully loaded, agent is trained from "+st.session_state.nb_USER_url+" via API token: "+st.session_state.nb_USER_api_token)  
