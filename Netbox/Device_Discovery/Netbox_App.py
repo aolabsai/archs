@@ -106,8 +106,9 @@ if st.button("Add Netbox Account & Train Agent", type="primary"):
     
     test_size = st.session_state.USER_num_test_devices
     np.random.shuffle(devices)
-    test_devices_in = devices[:test_size]
-    train_devices_in = devices[test_size:]
+    batch = devices[:st.session_state.USER_num_total_devices]
+    test_devices_in = batch[:test_size]
+    train_devices_in = batch[test_size: ]
     st.session_state.test_devices_in = test_devices_in
     
     count = 0
