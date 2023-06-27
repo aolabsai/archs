@@ -42,6 +42,9 @@ def Batch_New_Devices_Callback():
     st.session_state.correct_count = correct_count
     st.session_state.missing_count = missing_count
 
+
+st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
+
 if 'test_devices_in' not in st.session_state: st.text("You have to connect your Netbox account first.")
 
 else:
@@ -60,6 +63,7 @@ else:
     
     
     st.title('Netbox Demo - powered by aolabs.ai')
+    
     st.write("")
     st.markdown("## Programmatically Add New Devices")
     

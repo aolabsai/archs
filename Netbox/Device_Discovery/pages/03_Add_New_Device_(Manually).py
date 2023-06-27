@@ -14,7 +14,7 @@ import streamlit as st
 import pandas as pd
 
 # from netbox_ai_app.main_netbox import decimalToBinaryList, binaryListToDecimal
-
+st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
 if 'nbd' not in st.session_state: st.text("You have to connect your Netbox account first.")
 else:
 
@@ -30,6 +30,7 @@ else:
     train_devices_array_IO = st.session_state.nbd['train_devices_array_IO']
     
     st.title('Netbox Demo - powered by aolabs.ai')
+    
     st.write("")
     st.markdown("## Manually Add a New Device")
     # from PIL import Image

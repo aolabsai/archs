@@ -56,6 +56,7 @@ st.set_page_config(
         'About': "This is a demo of our AI features. Check out www.aolabs.ai and www.docs.aolabs.ai for more. Thank you!"
     }
 )
+st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
 
 # app front end
 st.title('Netbox Demo - powered by aolabs.ai')
