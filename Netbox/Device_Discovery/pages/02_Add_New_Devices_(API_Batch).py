@@ -45,6 +45,11 @@ def Batch_New_Devices_Callback():
 
 st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
 
+# app front end
+st.title('Netbox Demo - powered by aolabs.ai')
+st.write("")
+st.markdown("## Programmatically Add New Devices")
+
 if 'test_devices_in' not in st.session_state: st.text("You have to connect your Netbox account first.")
 
 else:
@@ -54,43 +59,33 @@ else:
     sites = st.session_state.sites
     types = st.session_state.device_types
     
-
     api_key = st.session_state.api_key
 
     test_devices = st.session_state.test_devices_in
     agent_id = st.session_state.agent_id
 
-    
-    
-    st.title('Netbox Demo - powered by aolabs.ai')
-    
-    st.write("")
-    st.markdown("## Programmatically Add New Devices")
-    
-    
-
-    
-   
+           
     st.button("Add this batch of new (test) devices", on_click= Batch_New_Devices_Callback, type="primary")
     
     devices = np.zeros([len(test_devices), 6], dtype='O')
-#     print(devices)
     for i in range(len(test_devices)):
         d = test_devices[i]
         devices[i, 0] = d.__str__()
-        devices[i, 1] = manufacturers[d.device_type.manufacturer.id]
-        devices[i, 2] = sites[d.site.id]
-        devices[i, 3] = types[d.device_type.id]
-        if 'predicted_roles' not in st.session_state:
+        devices[i, 1] = d.device_type.manufacturer.__str__()
+        devices[i, 2] = d.site.__str__()
+        devices[i, 3] = d.device_type.__str__()
+        if 'predicted_roles' not in st.session_state:    # if the prediction hasn't been run yet, no results to display
             devices[i, 4] = ""
-        else:
+        elif st.session_state.predicted_roles[i] in roles:    # if the 
             devices[i, 4] = roles[st.session_state.predicted_roles[i]]
+        else:
+            devices[i, 4] = "NO GUESS"        
         devices[i, 5] = roles[d.device_role.id]
     
 
     devices_df = pd.DataFrame( devices, columns=['Name', 'Manufacturer', 'Site', 'Type', 'PREDICTED ROLE', 'EXPECTED ROLE'])
     
-    st.table(devices_df)
+    st.dataframe(devices_df)
     
     if 'correct_count' in st.session_state:
         correct_percentage = (st.session_state.correct_count/len(test_devices))*100

@@ -13,7 +13,7 @@ import requests
 
 #using preset api key for now
 api_key = 'buildBottomUpRealAGI'
-st.session_state.api_key = api_key
+st.session_state.api_key = api_key     # might cause a bug; as per streamlit docs, the first streamlit command should be st.set_page_config if present; might not apply to st.session_state though see https://docs.streamlit.io/library/api-reference/utilities/st.set_page_config
 
 
 def agent_api_call(agent_id, input_dat, api_key, label=None):
@@ -65,7 +65,7 @@ st.markdown("## Add Your Netbox Account")
 st.markdown("Please enter the information below and then click the **Add Netbox Account** button to get started with this demo.")
 
 # USER inputs
-st.session_state.nb_USER_url = st.text_input('Enter your Netbox account URL:', "https://demo.netbox.dev/")    ## Note to Shane -- well done with the default text here! while looking up how you were using st.text_input, i see they also have a password option, see line below
+st.session_state.nb_USER_url = st.text_input('Enter your Netbox account URL:', "https://demo.netbox.dev/")
 st.session_state.nb_USER_api_token = st.text_input('Enter your Netbox account API token:',  type="password")
 st.session_state.USER_num_total_devices = st.number_input('How many of the devices in this Netbox account would you like to use for this demo?' , 0, 200)
 x = st.session_state.USER_num_total_devices
@@ -107,9 +107,9 @@ if st.button("Add Netbox Account & Train Agent", type="primary"):
     
     test_size = st.session_state.USER_num_test_devices
     np.random.shuffle(devices)
-    batch = devices[:st.session_state.USER_num_total_devices]
-    test_devices_in = batch[:test_size]
-    train_devices_in = batch[test_size: ]
+    batch = devices[0:st.session_state.USER_num_total_devices]    # batch = devices[:st.session_state.USER_num_total_devices] was not correct indexing
+    test_devices_in = batch[0:test_size]
+    train_devices_in = batch[test_size:]
     st.session_state.test_devices_in = test_devices_in
     
     count = 0
