@@ -20,27 +20,41 @@ def Batch_New_Devices_Callback():
     #run agent on test data
     i=0
     
-    st.session_state.predicted_roles = np.zeros(len(test_devices), dtype=int)
+    st.session_state.predicted_roles = []
+    st.session_state.predicted_roles_str = []
     correct_count = 0
     missing_count = 0
     prog_bar = st.progress(0, text="Testing Progress")
     for i in range(len(test_devices)):
         d = test_devices[i]
+        
+        # Run Agent API
         INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
         response = agent_api_call(st.session_state.agent_id, INPUT, st.session_state.api_key)
         print(response)
+        
+        # Calculate results
         story = response.json()['story']
-        st.session_state.predicted_roles[i] = int(story, 2)
+        st.session_state.predicted_roles += [int(story, 2)]
         expected = d.device_role.id
         if expected == int(story, 2):
             correct_count += 1
         elif st.session_state.predicted_roles[i] not in roles:
             missing_count += 1
+
+        # Display results        
+        try: # the predicted role from the list of roles
+            st.session_state.predicted_roles_str += [roles[st.session_state.predicted_roles[i]]]
+        except KeyError: # What would otherwise be called a hallucination. :) But we can filter it out because we're working within a fixed encoding/decoding Agent with fixed input/outputs.
+            st.session_state.predicted_roles_str += ["NO GUESS"]
+                
         prog_bar.progress(float(i)/len(test_devices), text='Testing Progress')
     prog_bar.progress(100, text='Testing Done')
     
     st.session_state.correct_count = correct_count
     st.session_state.missing_count = missing_count
+    
+    st.session_state.new_test_ran = True
 
 
 st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
@@ -50,7 +64,7 @@ st.title('Netbox Demo - powered by aolabs.ai')
 st.write("")
 st.markdown("## Programmatically Add New Devices")
 
-if 'test_devices_in' not in st.session_state: st.text("You have to connect your Netbox account first.")
+if 'nb_account_added' not in st.session_state: st.text("You have to connect your Netbox account first.")
 
 else:
     # load session data
@@ -64,7 +78,6 @@ else:
     test_devices = st.session_state.test_devices_in
     agent_id = st.session_state.agent_id
 
-           
     st.button("Add this batch of new (test) devices", on_click= Batch_New_Devices_Callback, type="primary")
     
     devices = np.zeros([len(test_devices), 6], dtype='O')
@@ -74,20 +87,18 @@ else:
         devices[i, 1] = d.device_type.manufacturer.__str__()
         devices[i, 2] = d.site.__str__()
         devices[i, 3] = d.device_type.__str__()
-        if 'predicted_roles' not in st.session_state:    # if the prediction hasn't been run yet, no results to display
+        
+        if 'predicted_roles' in st.session_state and st.session_state.new_test_ran is True:
+            devices[i, 4] = st.session_state.predicted_roles_str[i]
+        else: # the prediction hasn't been run yet, no results to display
             devices[i, 4] = ""
-        elif st.session_state.predicted_roles[i] in roles:    # if the 
-            devices[i, 4] = roles[st.session_state.predicted_roles[i]]
-        else:
-            devices[i, 4] = "NO GUESS"        
         devices[i, 5] = roles[d.device_role.id]
     
-
     devices_df = pd.DataFrame( devices, columns=['Name', 'Manufacturer', 'Site', 'Type', 'PREDICTED ROLE', 'EXPECTED ROLE'])
     
     st.dataframe(devices_df)
     
-    if 'correct_count' in st.session_state:
+    if st.session_state.new_test_ran is True:
         correct_percentage = (st.session_state.correct_count/len(test_devices))*100
         missing_percentage = (st.session_state.missing_count/len(test_devices))*100
 

@@ -103,8 +103,7 @@ if st.button("Add Netbox Account & Train Agent", type="primary"):
     st.session_state.roles = roles
 
     
-    
-    
+    # shuffle devices, prepare for test and train snapshot
     test_size = st.session_state.USER_num_test_devices
     np.random.shuffle(devices)
     batch = devices[0:st.session_state.USER_num_total_devices]    # batch = devices[:st.session_state.USER_num_total_devices] was not correct indexing
@@ -137,11 +136,11 @@ if st.button("Add Netbox Account & Train Agent", type="primary"):
     #table of devices, correct labels, and guessed labels? -- Note to Shane -- yes, plus the device mfg, type, and site; see "device_discovery" object in page 2
      # so redesign all the below, all the front end elements       
     st.write("Data successfully loaded, agent is trained from "+st.session_state.nb_USER_url+" via API token: "+st.session_state.nb_USER_api_token)  
-    st.write("There are "+str(count)+" devices; "+str(st.session_state.USER_num_test_devices)+" devices were withheld from the agent as test devices.")
+    st.write("Out of "+str(len(batch))+" devices, "+str(count)+" were used for training; "+str(st.session_state.USER_num_test_devices)+" were withheld as test devices (to predict their role).")
     st.write("Please remember to re-click the button below if you change the NB account or number of test devices.")
 
     st.session_state.nb_account_added = True
-    st.session_state.device_discovery = False   # so that device discovery results are refreshed on re-run
+    st.session_state.new_test_ran = False
 
 else:
     st.write("Add your info to run an Agent")
