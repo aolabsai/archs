@@ -62,6 +62,9 @@ st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/deve
 # app front end
 st.title('Netbox Demo - powered by aolabs.ai')
 st.write("")
+st.write("The agent was trained to predict a device's **role** based on its **manufacturer**, **type**, and **site**")
+st.write("Click the button below to predict the roles for the devices below, which were reserved for testing")
+st.write("")
 st.markdown("## Programmatically Add New Devices")
 
 if 'nb_account_added' not in st.session_state: st.text("You have to connect your Netbox account first.")

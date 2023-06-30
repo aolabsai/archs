@@ -62,7 +62,11 @@ st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/deve
 st.title('Netbox Demo - powered by aolabs.ai')
 st.write("")
 st.markdown("## Add Your Netbox Account")
-st.markdown("Please enter the information below and then click the **Add Netbox Account** button to get started with this demo.")
+instruction_md = "### Instructions \n\
+1) To use this demo fill out the boxes below with the corresponding information and click the button\n\
+2) After the agent finishes training proceed to the next page by clicking \"Add New Devices (API Batch)\" in the sidebar"
+st.markdown(instruction_md)
+# st.markdown("Please enter the information below and then click the **Add Netbox Account** button to get started with this demo.")
 
 # USER inputs
 st.session_state.nb_USER_url = st.text_input('Enter your Netbox account URL:', "https://demo.netbox.dev/")
@@ -136,7 +140,9 @@ if st.button("Add Netbox Account & Train Agent", type="primary"):
     #table of devices, correct labels, and guessed labels? -- Note to Shane -- yes, plus the device mfg, type, and site; see "device_discovery" object in page 2
      # so redesign all the below, all the front end elements       
     st.write("Data successfully loaded, agent is trained from "+st.session_state.nb_USER_url+" via API token: "+st.session_state.nb_USER_api_token)  
-    st.write("Out of "+str(len(batch))+" devices, "+str(count)+" were used for training; "+str(st.session_state.USER_num_test_devices)+" were withheld as test devices (to predict their role).")
+    st.write("{num_devices} devices are being used\n- {num_train} for training the agent\n- {num_test} for testing".format(num_devices=st.session_state.USER_num_total_devices, num_train=len(train_devices_in), num_test=test_size))
+    # st.write("Out of "+str(len(batch))+" devices, "+str(count)+" were used for training; "+str(st.session_state.USER_num_test_devices)+" were withheld as test devices (to predict their role).")
+    st.write("Proceed to the next step in the demo by clicking \"Add New Devices (API Batch)\" in the sidebar")
     st.write("Please remember to re-click the button below if you change the NB account or number of test devices.")
 
     st.session_state.nb_account_added = True
