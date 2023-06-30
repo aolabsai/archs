@@ -46,7 +46,7 @@ url2 = "https://i.imgur.com/j3jalQE.png"
 favicon = Image.open(urlopen(url2))
 
 st.set_page_config(
-    page_title="Netbox Demo App Powered by aolabs.ai",
+    page_title="Netbox Device Discovery Demo by aolabs.ai",
     page_icon=favicon,
     layout="wide",
     initial_sidebar_state="expanded",
@@ -59,12 +59,12 @@ st.set_page_config(
 st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
 
 # app front end
-st.title('Netbox Demo - powered by aolabs.ai')
+st.title('Netbox Device Discovery - demo powered by aolabs.ai')
 st.write("")
 st.markdown("## Add Your Netbox Account")
-instruction_md = "### Instructions \n\
-1) To use this demo fill out the boxes below with the corresponding information and click the button\n\
-2) After the agent finishes training proceed to the next page by clicking \"Add New Devices (API Batch)\" in the sidebar"
+instruction_md = "### Welcome \n\
+This is a demo of a locally trained AI Agent designed to help automate Netbox device discovery. It trained on a single Netbox instance, infering roles of new devices based on your current local list of devices even as it changes (Agents are not pre-trained on any other data). \n\
+After entering the info below to train an Agent, view its predictions in the next page by clicking \"Add New Devices (API Batch)\" in the sidebar"
 st.markdown(instruction_md)
 # st.markdown("Please enter the information below and then click the **Add Netbox Account** button to get started with this demo.")
 
@@ -135,10 +135,6 @@ if st.button("Add Netbox Account & Train Agent", type="primary"):
     st.write('Training done')
     
     
-    
-    # Note to Shane -- couldn't get the 2 markdowns below to work, please double chjeck and complete design of this area
-    #table of devices, correct labels, and guessed labels? -- Note to Shane -- yes, plus the device mfg, type, and site; see "device_discovery" object in page 2
-     # so redesign all the below, all the front end elements       
     st.write("Data successfully loaded, agent is trained from "+st.session_state.nb_USER_url+" via API token: "+st.session_state.nb_USER_api_token)  
     st.write("{num_devices} devices are being used\n- {num_train} for training the agent\n- {num_test} for testing".format(num_devices=st.session_state.USER_num_total_devices, num_train=len(train_devices_in), num_test=test_size))
     # st.write("Out of "+str(len(batch))+" devices, "+str(count)+" were used for training; "+str(st.session_state.USER_num_test_devices)+" were withheld as test devices (to predict their role).")
@@ -149,4 +145,4 @@ if st.button("Add Netbox Account & Train Agent", type="primary"):
     st.session_state.new_test_ran = False
 
 else:
-    st.write("Add your info to run an Agent")
+    st.write("Add your info before clicking this button")
