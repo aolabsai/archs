@@ -63,7 +63,7 @@ st.title('Netbox Device Discovery - demo powered by aolabs.ai')
 st.write("")
 st.markdown("## Add Your Netbox Account")
 instruction_md = "### Welcome \n\
-1) This is a demo of a locally trained AI Agents trained on single Netbox instances, to infer roles of newly discovered devices based on the current local list of devices even as that list changes (Agents are not pre-trained on any other data).\n\
+1) This is a demo of AI Agents trained on single Netbox instances, that infer roles of newly discovered devices based on the current local list of devices even as that list changes (Agents are not pre-trained on any other data).\n\
 2) After entering the info below to train an Agent, view its predictions in the next page by clicking \"Add New Devices (API Batch)\" in the sidebar"
 st.markdown(instruction_md)
 # st.markdown("Please enter the information below and then click the **Add Netbox Account** button to get started with this demo.")
