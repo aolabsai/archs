@@ -16,22 +16,28 @@ connector_function = "full_conn"
 # arch_c = []
 # connector_function = "full_conn"
 
+##############################################################################
 
 class Arch(object):
     """Arch constructor class."""
-    def __init__(self, arch_i, arch_z, arch_c=[], connector_function="full", description=""):
+    def __init__(self, arch_i, arch_z, arch_c=[], connector_function="full_conn",  description=""):
         super(Arch, self).__init__()
         self.i = arch_i
         self.q = self.i.copy()
         self.z = arch_z
         self.c = [4]+arch_c
-        self.connector_function = connector_function 
+        self.connector_function = connector_function
         self.description = description
 
 arch = Arch(arch_i, arch_z, arch_c, connector_function, description)
 
 arch.sets = [arch.i, arch.q, arch.z, arch.c]
 arch.sets_labels = ["I", "Q", "Z", "C"]
+
+# I - Input neurons: 0 or 1 depending on fixed ENV decoding
+# Q - State or interneurons: 0 or 1 depending on learned lookup tabled comproised of connected neurons
+# Z - Output neurons: also learning binary neurons like Q, except Z actuates Agent in enviroment
+# C - Control neurons: 0 or 1 depending on designer defined trigger or method like instincts to activate learning; a defined condition on input which triggers the C neuron
 
 si = 0     # sets, i.e. category of neurons corresponding to major type, i.g. I or Z or C
 neuron_counter = 0
@@ -49,19 +55,18 @@ for s in arch.sets:
         arch.__dict__[Set_label+"__flat"] += arch.__dict__[Set_label][ci]
         neuron_counter += c
         ci += 1
-    
+    arch.__dict__[Set_label+"__flat"] = np.array(arch.__dict__[Set_label+"__flat"])
     si += 1
     
 arch.n_total = sum(arch.i + arch.q + arch.z + arch.c)
 
-arch.IQZC = arch.I__flat + arch.Q__flat + arch.Z__flat + arch.C__flat
-arch.IQZ  = arch.I__flat + arch.Q__flat + arch.Z__flat
-arch.QZ__flat =            arch.Q__flat + arch.Z__flat        # remove flat from ao_core later for consistency
+arch.IQZC = np.concatenate((arch.I__flat, arch.Q__flat, arch.Z__flat, arch.C__flat))
+arch.IQZ  = np.concatenate((arch.I__flat, arch.Q__flat, arch.Z__flat))
+arch.QZ__flat = np.concatenate((arch.Q__flat, arch.Z__flat))        # remove flat from ao_core later for consistency
 
-arch.C__flat_command = [70, 71, 72, 73]
-arch.C__flat_pleasure= [70, 71, 72, 73]
-arch.C__flat_pain    = [73] 
-
+arch.C__flat_command = np.array(arch.C[0])     # the first C channel always contains the command neurons which are default to each Agent
+arch.C__flat_pleasure= np.array([arch.C[0][0], arch.C[0][1], arch.C[0][3]])
+arch.C__flat_pain    = np.array([arch.C[0][2]])
 
 # Defining Neuron metadata -- the connections of neurons (i.e. which neurons consititue each others' lookup tables)
 arch.datamatrix = np.zeros([5, arch.n_total], dtype="O")
@@ -71,6 +76,7 @@ arch.datamatrix = np.zeros([5, arch.n_total], dtype="O")
     #2 Neighbor Connections
     #3 C Connections
     #4 Dominant Connection
+    #    ** note; the dominant connection is critical; it is why Q is made in the shape/size of I, so that each Q has a corresponding I as dominant connection (the dominant connection for Z is its own past state [-1]; since if the NSM did something "good / triggered C(s) pleasure neuron(s)" during iconic training, Q will be dominated by I and Z by its past Z (the training becomes; given C at state s, store I(s) and Z(s-1) since Z(s-1) led to the I(s) which triggered C(s)
 
 arch.datamatrix[0, arch.I__flat] = "Input"
 arch.datamatrix[0, arch.Q__flat] = "CGA Q"
@@ -184,4 +190,18 @@ def rand_conn(q_in_conn, q_ne_conn, z_in_conn, z_ne_conn):
         for n in Channel:
             arch.datamatrix[3, n] = sorted(arch.Q__flat) + sorted(arch.Z__flat)
             
-    arch.datamatrix_type = "rand_conn "+str(q_in_conn)+"  "+str(q_ne_conn)+" "+str(z_in_conn)+" "+str(z_ne_conn)
+    arch.datamatrix_type = "rand_conn "+str(q_in_conn)+"-"+str(q_ne_conn)+"--"+str(z_in_conn)+"-"+str(z_ne_conn)
+    
+    
+## Defining C control propertires
+arch.datamatrix[4, arch.C[0][0]] = "Default if label"
+arch.datamatrix[4, arch.C[0][1]] = "C+ pleasure signal"
+arch.datamatrix[4, arch.C[0][2]] = "C- pain signal"
+#arch.datamatrix[4, arch.C[0][3]] the default instinct control neuron
+def c0_instinct_rule(INPUT, Agent):
+    if INPUT[0] == 1    and    Agent.story[ Agent.state-1,  Agent.arch.Z__flat[0]] == 1 :        # arch.Z__flat[0] needs to be adjusted as per the agent, which output the designer wants the agent to repeat while learning postively or negatively
+        instinct_response = [1, "c0 instinct triggered"]    
+    else:
+        instinct_response = [0, "c0 pass"]    
+    return instinct_response            
+arch.datamatrix[4, arch.C[0][3]] = c0_instinct_rule
