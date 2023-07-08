@@ -12,7 +12,6 @@ import streamlit as st
 import pandas as pd
 
 
-# from netbox_ai_app.main_netbox import binaryListToDecimal
 from Netbox_App import agent_api_call
 
 #show results button from first page?
@@ -67,7 +66,7 @@ st.write("Click the button below to predict the roles for the devices below, whi
 st.write("")
 st.markdown("## Programmatically Add New Devices")
 
-if 'nb_account_added' not in st.session_state: st.text("You have to connect your Netbox account first.")
+if 'trained' not in st.session_state: st.text("You have to connect your Netbox account first.")
 
 else:
     # load session data

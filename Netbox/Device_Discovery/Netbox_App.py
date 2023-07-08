@@ -9,12 +9,10 @@ Main Page - Netbox Device Discovery
 import numpy as np
 import streamlit as st
 import requests
+import pynetbox
 
-
-#using preset api key for now
-api_key = 'buildBottomUpRealAGI'
-st.session_state.api_key = api_key     # might cause a bug; as per streamlit docs, the first streamlit command should be st.set_page_config if present; might not apply to st.session_state though see https://docs.streamlit.io/library/api-reference/utilities/st.set_page_config
-
+from PIL import Image
+from urllib.request import urlopen
 
 def agent_api_call(agent_id, input_dat, api_key, label=None):
     url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel/agent"
@@ -39,47 +37,7 @@ def agent_api_call(agent_id, input_dat, api_key, label=None):
     response = requests.post(url, json=payload, headers=headers)
     return response
 
-
-from PIL import Image
-from urllib.request import urlopen
-url2 = "https://i.imgur.com/j3jalQE.png"
-favicon = Image.open(urlopen(url2))
-
-st.set_page_config(
-    page_title="Netbox Device Discovery Demo by aolabs.ai",
-    page_icon=favicon,
-    layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={
-        'Get Help': "mailto:ali@aolabs.ai",
-        'Report a bug': "mailto:ali@aolabs.ai",
-        'About': "This is a demo of our AI features. Check out www.aolabs.ai and www.docs.aolabs.ai for more. Thank you!"
-    }
-)
-st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
-
-# app front end
-st.title('Netbox Device Discovery - demo powered by aolabs.ai')
-st.write("")
-st.markdown("## Add Your Netbox Account")
-instruction_md = "### Welcome \n\
-1) This is a demo of AI Agents trained on single Netbox instances, that infer roles of newly discovered devices based on the current local list of devices even as that list changes (Agents are not pre-trained on any other data).\n\
-2) After entering the info below to train an Agent, view its predictions in the next page by clicking \"Add New Devices (API Batch)\" in the sidebar"
-st.markdown(instruction_md)
-# st.markdown("Please enter the information below and then click the **Add Netbox Account** button to get started with this demo.")
-
-# USER inputs
-st.session_state.nb_USER_url = st.text_input('Enter your Netbox account URL:', "https://demo.netbox.dev/")
-st.session_state.nb_USER_api_token = st.text_input('Enter your Netbox account API token:',  type="password")
-st.session_state.USER_num_total_devices = st.number_input('How many of the devices in this Netbox account would you like to use for this demo?' , 0, 200)
-x = st.session_state.USER_num_total_devices
-st.session_state.USER_num_test_devices = st.number_input("Of those ("+str(x)+") devices, how many should be withheld to TEST this new local Device Discovery AI?" , 0, 100)
-st.session_state.agent_id = st.text_input("Enter a unique name/id for this AI Agent")
-
-
-if st.button("Add Netbox Account & Train Agent", type="primary"):
-    
-    import pynetbox
+def add_netbox():
     nb = pynetbox.api(
         st.session_state.nb_USER_url,
         token= str(st.session_state.nb_USER_api_token),
@@ -106,14 +64,21 @@ if st.button("Add Netbox Account & Train Agent", type="primary"):
     st.session_state.sites = sites
     st.session_state.roles = roles
 
-    
+    st.session_state.devices = devices
+
+    st.session_state.account_added = True
+
+
+def train_agents():
     # shuffle devices, prepare for test and train snapshot
+    devices = st.session_state.devices
     test_size = st.session_state.USER_num_test_devices
     np.random.shuffle(devices)
-    batch = devices[0:st.session_state.USER_num_total_devices]    # batch = devices[:st.session_state.USER_num_total_devices] was not correct indexing
+    batch = devices[0:st.session_state.USER_num_total_devices]
     test_devices_in = batch[0:test_size]
     train_devices_in = batch[test_size:]
     st.session_state.test_devices_in = test_devices_in
+    st.session_state.train_size = len(train_devices_in)
     
     count = 0
     prog_bar = st.progress(0, text="Training Progress")
@@ -132,17 +97,90 @@ if st.button("Add Netbox Account & Train Agent", type="primary"):
 
     # display training is DONE message
     prog_bar.progress(1.0, text='Training Done')
+    # st.write('Training done')
+    
+    
+    # st.write("Data successfully loaded, agent is trained from "+st.session_state.nb_USER_url+" via API token: "+st.session_state.nb_USER_api_token)  
+    # st.write("{num_devices} devices are being used\n- {num_train} for training the agent\n- {num_test} for testing".format(num_devices=st.session_state.USER_num_total_devices, num_train=len(train_devices_in), num_test=test_size))
+    # # st.write("Out of "+str(len(batch))+" devices, "+str(count)+" were used for training; "+str(st.session_state.USER_num_test_devices)+" were withheld as test devices (to predict their role).")
+    # st.write("Proceed to the next step in the demo by clicking \"Add New Devices (API Batch)\" in the sidebar")
+    # st.write("Please remember to re-click the button below if you change the NB account or number of test devices.")
+
+    st.session_state.trained = True
+    # st.session_state.nb_account_added = True
+    st.session_state.new_test_ran = False
+
+
+url2 = "https://i.imgur.com/j3jalQE.png"
+favicon = Image.open(urlopen(url2))
+
+st.set_page_config(
+    page_title="Netbox Device Discovery Demo by aolabs.ai",
+    page_icon=favicon,
+    layout="wide",
+    initial_sidebar_state="expanded",
+    menu_items={
+        'Get Help': "mailto:ali@aolabs.ai",
+        'Report a bug': "mailto:ali@aolabs.ai",
+        'About': "This is a demo of our AI features. Check out www.aolabs.ai and www.docs.aolabs.ai for more. Thank you!"
+    }
+)
+st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
+
+#using preset api key for now
+api_key = 'buildBottomUpRealAGI'
+st.session_state.api_key = api_key  
+
+
+# app front end
+st.title('Netbox Device Discovery - demo powered by [aolabs.ai](https://www.aolabs.ai/)')
+st.write("")
+st.markdown("## Add Your Netbox Account")
+instruction_md = "### Welcome \n\
+1) This is a demo of AI Agents trained on single Netbox instances, that infer roles of newly discovered devices based on the current local list of devices even as that list changes (Agents are not pre-trained on any other data).\n\
+2) After entering the info below to train an Agent, view its predictions in the next page by clicking \"Add New Devices (API Batch)\" in the sidebar"
+st.markdown(instruction_md)
+# st.markdown("Please enter the information below and then click the **Add Netbox Account** button to get started with this demo.")
+
+account_added = False
+num_devices = 0
+if 'devices' in st.session_state:
+    account_added = True
+    num_devices = len(st.session_state.devices)
+
+
+left, right = st.columns(2)
+
+# USER inputs
+with left:
+    st.session_state.nb_USER_url = st.text_input('Enter your Netbox account URL:', "https://demo.netbox.dev/")
+    help_netbox_api = "you can get an api key by going to {Netbox url}/user/api-tokens/ and generating a new api key, for demo.netbox.dev log in with the username 'admin' and password 'admin'"
+    st.session_state.nb_USER_api_token = st.text_input('Enter your Netbox account API token:',  type="password", help=help_netbox_api)
+
+    left_filled = len(st.session_state.nb_USER_url) > 0 and len(st.session_state.nb_USER_api_token) > 0
+    st.button("Add Netbox Account", type="primary", on_click=add_netbox, disabled=not(left_filled))
+    
+    if 'devices' in st.session_state:
+        st.write("There are {} devices on this netbox account".format(len(st.session_state.devices)))
+
+with right:
+    st.session_state.USER_num_total_devices = st.number_input('How many of the devices in this Netbox account would you like to use for this demo?' , 0, num_devices, disabled=not(account_added))
+    x = st.session_state.USER_num_total_devices
+    max_test_devices = 0 if x-1 < 0 else x-1
+    st.session_state.USER_num_test_devices = st.number_input("Of those ("+str(x)+") devices, how many should be withheld to TEST this new local Device Discovery AI?" , 0, max_test_devices, disabled=not(account_added))
+    st.session_state.agent_id = st.text_input("Enter a unique name/id for this AI Agent", disabled=not(account_added))
+
+    right_filled = len(st.session_state.agent_id) > 0
+    st.button("Train your agent", type="primary", on_click=train_agents, disabled=not(account_added) or not(right_filled))
+
+
+
+if 'trained' in st.session_state:
     st.write('Training done')
-    
-    
     st.write("Data successfully loaded, agent is trained from "+st.session_state.nb_USER_url+" via API token: "+st.session_state.nb_USER_api_token)  
-    st.write("{num_devices} devices are being used\n- {num_train} for training the agent\n- {num_test} for testing".format(num_devices=st.session_state.USER_num_total_devices, num_train=len(train_devices_in), num_test=test_size))
+    # num_trained = st.session_state.USER_num_total_devices - st.session_state.USER_num_test_devices
+    device_count = st.session_state.train_size + len(st.session_state.test_devices_in)
+    st.write("- {num_devices} devices are being used\n- {num_train} for training the agent\n- {num_test} for testing".format(num_devices=device_count, num_train=st.session_state.train_size, num_test=len(st.session_state.test_devices_in)))
     # st.write("Out of "+str(len(batch))+" devices, "+str(count)+" were used for training; "+str(st.session_state.USER_num_test_devices)+" were withheld as test devices (to predict their role).")
     st.write("Proceed to the next step in the demo by clicking \"Add New Devices (API Batch)\" in the sidebar")
     st.write("Please remember to re-click the button below if you change the NB account or number of test devices.")
-
-    st.session_state.nb_account_added = True
-    st.session_state.new_test_ran = False
-
-else:
-    st.write("Add your info before clicking this button")
