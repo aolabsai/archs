@@ -9,12 +9,14 @@ Created on Sun Apr  9 01:47:11 2023
 # import ao_core as ao
 
 # 3rd Party Modules
-# import numpy as np
 import streamlit as st
 import pandas as pd
 
-# from netbox_ai_app.main_netbox import decimalToBinaryList, binaryListToDecimal
+from Netbox_App import agent_api_call
+
 st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
+
+
 if 'nbd' not in st.session_state: st.text("You have to connect your Netbox account first.")
 else:
 
