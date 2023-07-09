@@ -1,99 +1,100 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Apr  9 01:47:11 2023
+Page 3 of App - Netbox Device Discovery
 
-@author: alebr
+Purpose: to display the results of an Agent's deivce role prediction as an autofill recommender that can be live-trained
+
 """
-
-# AO Labs Modules
-# import ao_core as ao
 
 # 3rd Party Modules
 import streamlit as st
+import numpy as np
 import pandas as pd
 
+# App Modules
 from Netbox_App import agent_api_call
 
-st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
+
+# need to move these to main app page after Shane's fixes
+st.session_state.recs = 0
+st.session_state.mistakes = 0
 
 
-if 'nbd' not in st.session_state: st.text("You have to connect your Netbox account first.")
-else:
+def Recommendation_Callback():            
+    # Run Agent API
+    INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
+    response = agent_api_call(st.session_state.agent_id, INPUT, st.session_state.api_key)
+    print("RECOMMENDED - "+response)
 
-    # load session data
-    roles = st.session_state.nbd["roles"]
-    manufacturers = st.session_state.nbd['manufacturers']
-    sites = st.session_state.nbd['sites']
-    types = st.session_state.nbd['types']
-    roles_id_to_str = st.session_state.nbd['roles_id_to_str']
-    inc = st.session_state.nbd['inc']
-    test_devices_info = st.session_state.nbd['test_devices_info']
-    test_devices_array_IO = st.session_state.nbd['test_devices_array_IO']
-    train_devices_array_IO = st.session_state.nbd['train_devices_array_IO']
-    
-    st.title('Netbox Demo - powered by aolabs.ai')
-    
-    st.write("")
-    st.markdown("## Manually Add a New Device")
-    # from PIL import Image
-    # from urllib.request import urlopen
-    # url = ""
-    # img = Image.open(urlopen(url))
-    # st.image(img)
-    st.write("")
-    st.markdown("Welcome! This is a prototype of a context aware autocomplete AI for local relational data, powered by [aolabs.ai](https://www.aolabs.ai/).")
-    st.markdown("For the purposes of this demo you are a network admin adding the following 10 new devices to your current Netbox configuration as you would on [this Netbox page](https://demo.netbox.dev/dcim/devices/add/):")
-    device_discovery_df_batch = pd.DataFrame( test_devices_info[:, 0:4], columns=['Name', 'Manufacturer', 'Site', 'Type'])
-    st.write(device_discovery_df_batch)
-    st.write("")
-    st.markdown("Does our AI autocomplete speed up that process?")
-    st.write("The devices and configuration are pulled from https://demo.netbox.dev/dcim/devices/ There are "+str(inc)+" devices there; the 10 devices listed for testing were **excluded** from training (i.e. only "+str(inc-10)+" devices were used for training).")
-    st.write("")
-    st.markdown("Note: fields marked by '*' are required when adding a new device on Netbox")
-    #use on_change to track changes
-    
-    #%%
-    def Recommendation_Callback():
-    
-        manufacturer_bin = decimalToBinaryList(manufacturers[manufacturer_selected], 10)
-        site_bin = decimalToBinaryList(sites[site_selected], 10)
-        type_bin = decimalToBinaryList(types[type_selected], 10)
-        
-        # device type suggestion
-        st.session_state.agent.reset_state()
-        st.session_state.agent.next_state(manufacturer_bin + site_bin + type_bin, print_result=False, unsequenced=True)
-        st.session_state.agent.next_state(manufacturer_bin + site_bin + type_bin, print_result=False, unsequenced=True)
-        
-        rec_bin = st.session_state.agent.story[ st.session_state.agent.state-1,  st.session_state.agent.arch.Z__flat]
-        rec_dec = binaryListToDecimal(rec_bin.astype(int))
-    
-        st.session_state.rec_dec = rec_dec
-        st.session_state.recs += 1
-    
-    manufacturer_selected = st.selectbox('Manufacturer *', list(manufacturers.keys()))
-    site_selected = st.selectbox('Site *', list(sites.keys()))
-    type_selected = st.selectbox("Type *", list(types.keys()))
-    role_selected = st.selectbox('Device Role *', list(roles.keys()))
-    
-    Recommendation_Callback()
-    
+    st.session_state.recs += 1
     try:
-        st.write("**Predicted** *Device Role*:  "+ roles_id_to_str[st.session_state.rec_dec])
+        st.session_state.recommendation = roles[response]
+        st.write("**Predicted** *Device Role*:  "+ st.session_state.recommendation)
     except KeyError:
         st.session_state.mistakes += 1
         st.write("Oops, no recommendation to offer; this happened "+str( st.session_state.mistakes)+" out of "+str( st.session_state.recs)+" recs so far") 
-    
-    def New_Device_Callback():
-    
-        manufacturer_bin = decimalToBinaryList(manufacturers[manufacturer_selected], 10)
-        site_bin = decimalToBinaryList(sites[site_selected], 10)
-        type_bin = decimalToBinaryList(types[type_selected], 10)
-        role_bin = decimalToBinaryList(roles[role_selected], 10)
-    
-        st.session_state.agent.next_state(manufacturer_bin + site_bin + type_bin,
-                            role_bin, print_result=False, unsequenced=True)
-        st.session_state.agent.reset_state()
-    
+
+
+def Confirm_Recommendation_Callback():               
+    # Run Agent API
+    INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
+    LABEL = format(role_id, '010b')
+    response = agent_api_call(st.session_state.agent_id, INPUT, st.session_state.api_key, label=LABEL)
+    print("CONFIRMED - "+response)
+    st.write("Device confirmed; has been trained.") 
+
+
+## front end
+st.title('Netbox Demo - powered by aolabs.ai')
+st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
+st.write("")
+st.markdown("## Manually Add a New Device")
+st.write("")
+st.markdown("Welcome! This is a prototype of a context aware autocomplete AI for local relational data, powered by [aolabs.ai](https://www.aolabs.ai/).")
+
+if 'trained' not in st.session_state:
     st.write("")
-    st.button("Add as new device", on_click= New_Device_Callback)
+    st.text("You have to connect your Netbox account first.")
+
+else:
+
+    # generate table of devices to be added / recommended    
+    if st.session_state.new_test_ran is True:
+        test_devices = st.session_state.test_devices_in
+        test_devices_table = np.zeros([len(test_devices), 4], dtype='O')
+        for i in range(len(test_devices)):
+            d = test_devices[i]
+            test_devices_table[i, 0] = d.__str__()
+            test_devices_table[i, 1] = d.device_type.manufacturer.__str__()
+            test_devices_table[i, 2] = d.site.__str__()
+            test_devices_table[i, 3] = d.device_type.__str__()
+        st.session_state.test_devices_table = pd.DataFrame( test_devices_table, columns=['Name', 'Manufacturer', 'Site', 'Type'])
+    st.markdown("For the purposes of this demo you are a network admin adding the following devices to your current Netbox configuration as you would on [this Netbox page](https://demo.netbox.dev/dcim/devices/add/):")
+    st.write(st.session_state.test_devices_table)
+    st.write("")
+
+    # load session data
+    manufacturers = st.session_state.manufacturers
+    roles = st.session_state.roles
+    sites = st.session_state.sites
+    types = st.session_state.device_types  
+
+    # USER input fields    
+    manufacturer_selected = st.selectbox('Manufacturer *', list(manufacturers.values()))
+    site_selected = st.selectbox('Site *', list(sites.values()))
+    type_selected = st.selectbox("Type *", list(types.values()))
+    role_selected = st.selectbox('Device Role *', list(roles.values()))
+
+    #converting user input to IDs
+    manufacturer_id = list(manufacturers.keys())[list(manufacturers.values()).index(manufacturer_selected)]
+    site_id = list(sites.keys())[list(sites.values()).index(site_selected)]
+    type_id = list(types.keys())[list(types.values()).index(type_selected)]
+    role_id = list(roles.keys())[list(roles.values()).index(role_selected)]
+    
+    # recommend a device whenever any input changes on this page
+    Recommendation_Callback()
+
+    # offer USER ability to confirm recommendation and postively reinforce Agent    
+    st.write("")
+    st.button("Add as new device", on_click= Confirm_Recommendation_Callback)
     st.write("")
