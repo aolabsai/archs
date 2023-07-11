@@ -110,6 +110,8 @@ def train_agents():
     # st.session_state.nb_account_added = True
     st.session_state.new_test_ran = False
 
+    st.session_state.recs = 0
+    st.session_state.mistakes = 0
 
 url2 = "https://i.imgur.com/j3jalQE.png"
 favicon = Image.open(urlopen(url2))
