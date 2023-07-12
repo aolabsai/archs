@@ -14,17 +14,10 @@ import pandas as pd
 # App Modules
 from Netbox_App import agent_api_call
 
-
-# need to move these to main app page after Shane's fixes
-st.session_state.recs = 0
-st.session_state.mistakes = 0
-
-
 def Recommendation_Callback():            
     # Run Agent API
     INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
     response = agent_api_call(st.session_state.agent_id, INPUT, st.session_state.api_key)
-    print(response.json())
     result = response.json()['story']
     print("RECOMMENDED - " + result)
 
