@@ -32,7 +32,7 @@ def agent_api_call(agent_id, input_dat, label=None):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "X-API-KEY":  st.secrets['aolabs_api_key']
+        "X-API-KEY": st.secrets['aolabs_api_key']
     }
 
     response = requests.post(url, json=payload, headers=headers)
@@ -127,8 +127,8 @@ st.write("## demo by [aolabs.ai](https://www.aolabs.ai/)")
 st.write("")
 instruction_md = "### Welcome! \n\
 In testing out a new type of locally trained AI Agents, we applied them to Netbox, specifcally to device discovery.\n\
-**How it works:** you connect an Agent to a single Netbox instance (enter a netbox url and token); it'll be trained on your list of devices, from the manufacter, type, and site, to infer the role of newly added devices. Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application.\n\
-After entering the info below to train an Agent, view its predictions in the sidebar as a batch or as an context-aware auto-complete."
+  **How it works:** you connect an Agent to a single Netbox instance (enter a netbox url and token); it'll be trained on your list of devices, from the manufacter, type, and site, to infer the role of newly added devices. Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application.\n\
+  After entering the info below to train an Agent, view its predictions in the sidebar as a batch or as an context-aware auto-complete."
 st.markdown(instruction_md)
 
 # Capture USER inputs
@@ -137,7 +137,7 @@ left, right = st.columns(2)
 ## Netbox account
 with left:
     st.session_state.nb_USER_url = st.text_input('Enter your Netbox account URL:', "https://demo.netbox.dev/")
-    help_netbox_api = "Get your Netbox API key from {your Netbox url}/user/api-tokens/ or from the Netbox public demo by logging in to [demo.netbox.dev](https://demo.netbox.dev/user/api-tokens/) with username 'admin' and password 'admin'"
+    help_netbox_api = "Get your Netbox API key from {your Netbox url}/user/api-tokens/; for instance from the Netbox public demo by logging in to [demo.netbox.dev](https://demo.netbox.dev/user/api-tokens/) with username *admin* and password *admin*."
     st.session_state.nb_USER_api_token = st.text_input('Enter your Netbox account API token:',  type='password', help=help_netbox_api)
 
     left_filled = len(st.session_state.nb_USER_url) > 0 and len(st.session_state.nb_USER_api_token) > 0
@@ -148,14 +148,11 @@ with left:
 
 ## Training and test configuration
 with right:
-    min_value= 2
-    max_value= st.session_state.num_devices
-    if max_value < 2: min_value = 0
-    st.session_state.USER_num_total_devices = st.number_input("How many of the available devices in this Netbox account would you like to use for this demo?" , min_value=min_value, max_value=max_value, disabled=not(st.session_state.account_added))
+    st.session_state.USER_num_total_devices = st.number_input("How many of the available devices in this Netbox account would you like to use for this demo?" , min_value=2, max_value=3, disabled=not(st.session_state.account_added))
     x = st.session_state.USER_num_total_devices
     max_test_devices = x-1
     help_numtest = "The rest of the devices will be used for training the Agent."
-    st.session_state.USER_num_test_devices = st.number_input("Of those ("+str(x)+") devices, how many should be withheld to TEST the Agent?" , min_value=1, max_value=max_test_devices, disabled=not(st.session_state.account_added), help=help_numtest)
+    st.session_state.USER_num_test_devices = st.number_input("Of those ("+str(x)+") devices, how many should be withheld to TEST the Agent?" , min_value=0, max_value=max_test_devices, disabled=not(st.session_state.account_added), help=help_numtest)
     st.session_state.agent_id_field = st.text_input("Enter a unique name for this Agent", disabled=not(st.session_state.account_added))
 
     right_filled = len(st.session_state.agent_id_field) > 0
