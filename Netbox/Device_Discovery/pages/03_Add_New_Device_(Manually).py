@@ -24,11 +24,13 @@ def Recommendation_Callback():
     # Run Agent API
     INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
     response = agent_api_call(st.session_state.agent_id, INPUT, st.session_state.api_key)
-    print("RECOMMENDED - "+response)
+    print(response.json())
+    result = response.json()['story']
+    print("RECOMMENDED - " + result)
 
     st.session_state.recs += 1
     try:
-        st.session_state.recommendation = roles[response]
+        st.session_state.recommendation = roles[result]
         st.write("**Predicted** *Device Role*:  "+ st.session_state.recommendation)
     except KeyError:
         st.session_state.mistakes += 1
@@ -40,7 +42,8 @@ def Confirm_Recommendation_Callback():
     INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
     LABEL = format(role_id, '010b')
     response = agent_api_call(st.session_state.agent_id, INPUT, st.session_state.api_key, label=LABEL)
-    print("CONFIRMED - "+response)
+    result = response.json()['story']
+    print("CONFIRMED - " + result)
     st.write("Device confirmed; has been trained.") 
 
 

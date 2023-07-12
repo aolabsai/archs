@@ -30,7 +30,7 @@ def Batch_New_Devices_Callback():
         # Run Agent API
         INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
         response = agent_api_call(st.session_state.agent_id, INPUT, st.session_state.api_key)
-        print(response)
+        # print(response)
         
         # Calculate results
         story = response.json()['story']
@@ -65,6 +65,7 @@ st.write("The agent was trained to predict a device's **role** based on its **ma
 st.write("Click the button below to predict the roles for the devices below, which were reserved for testing")
 st.write("")
 st.markdown("## Programmatically Add New Devices")
+
 
 if 'trained' not in st.session_state: st.text("You have to connect your Netbox account first.")
 
