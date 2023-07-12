@@ -40,32 +40,39 @@ def agent_api_call(agent_id, input_dat, label=None):
 
 
 def add_netbox():
-    nb = pynetbox.api(
-        st.session_state.nb_USER_url,
-        token= str(st.session_state.nb_USER_api_token),
-        threading=True)
-    devices = list(nb.dcim.devices.all())
-
     #save {id: attribute} dicts of device info to session_state
     manufacturers = {}
     device_types = {}
     sites = {}
     roles = {}    
 
-    for d in devices:
-        manufacturers[d.device_type.manufacturer.id] = d.device_type.manufacturer.__str__()
-        device_types[d.device_type.id] = d.device_type.__str__()
-        sites[d.site.id] = d.site.__str__()
-        roles[d.device_role.id] = d.device_role.__str__()
-    
+    nb = pynetbox.api(
+        st.session_state.nb_USER_url,
+        token= str(st.session_state.nb_USER_api_token),
+        threading=True)
+    try:
+        devices = list(nb.dcim.devices.all())
+        st.session_state.account_added = True
+        st.session_state.valid_netbox_apikey = True
+        st.session_state.num_devices = len(st.session_state.devices)
+        st.session_state.devices = devices
+        for d in devices:
+            manufacturers[d.device_type.manufacturer.id] = d.device_type.manufacturer.__str__()
+            device_types[d.device_type.id] = d.device_type.__str__()
+            sites[d.site.id] = d.site.__str__()
+            roles[d.device_role.id] = d.device_role.__str__()
+    except pynetbox.RequestError as e:
+        devices = []
+        st.session_state.account_added = False
+        st.session_state.valid_netbox_apikey = False
+        st.session_state.num_devices = 2
+        st.session_state.devices = devices
+        print(e)
+   
     st.session_state.manufacturers = manufacturers
     st.session_state.device_types = device_types
     st.session_state.sites = sites
     st.session_state.roles = roles
-
-    st.session_state.devices = devices
-    st.session_state.num_devices = len(st.session_state.devices)
-    st.session_state.account_added = True
 
 
 if 'account_added' not in st.session_state:
@@ -143,16 +150,21 @@ with left:
     left_filled = len(st.session_state.nb_USER_url) > 0 and len(st.session_state.nb_USER_api_token) > 0
     st.button("Connect Netbox Account", type="primary", on_click=add_netbox, disabled=not(left_filled))
        
-    if st.session_state.account_added is True:
-        st.write("Agent connected; there {} devices on this Netbox account available for training/testing.".format(st.session_state.num_devices))
+    if 'account_added' in st.session_state:
+        if st.session_state.account_added is True:
+            st.write("Agent connected; there {} devices on this Netbox account available for training/testing.".format(st.session_state.num_devices))
+        
+    if 'valid_netbox_apikey' in st.session_state:
+        if st.session_state.valid_netbox_apikey is False:
+            st.write("Imporer Netbox API key-- please try again.")
 
 ## Training and test configuration
 with right:
-    st.session_state.USER_num_total_devices = st.number_input("How many of the available devices in this Netbox account would you like to use for this demo?" , min_value=2, max_value=3, disabled=not(st.session_state.account_added))
+    st.session_state.USER_num_total_devices = st.number_input("How many of the available devices in this Netbox account would you like to use for this demo?" , min_value=2, max_value=st.session_state.num_devices, disabled=not(st.session_state.account_added))
     x = st.session_state.USER_num_total_devices
     max_test_devices = x-1
     help_numtest = "The rest of the devices will be used for training the Agent."
-    st.session_state.USER_num_test_devices = st.number_input("Of those ("+str(x)+") devices, how many should be withheld to TEST the Agent?" , min_value=0, max_value=max_test_devices, disabled=not(st.session_state.account_added), help=help_numtest)
+    st.session_state.USER_num_test_devices = st.number_input("Of those ("+str(x)+") devices, how many should be withheld to TEST the Agent?" , min_value=1, max_value=max_test_devices, disabled=not(st.session_state.account_added), help=help_numtest)
     st.session_state.agent_id_field = st.text_input("Enter a unique name for this Agent", disabled=not(st.session_state.account_added))
 
     right_filled = len(st.session_state.agent_id_field) > 0
