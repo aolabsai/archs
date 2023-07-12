@@ -32,7 +32,7 @@ def agent_api_call(agent_id, input_dat, label=None):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "X-API-KEY": st.secrets['aolabs_api_key']
+        "X-API-KEY":  st.secrets['aolabs_api_key']
     }
 
     response = requests.post(url, json=payload, headers=headers)
@@ -148,7 +148,10 @@ with left:
 
 ## Training and test configuration
 with right:
-    st.session_state.USER_num_total_devices = st.number_input("How many of the available devices in this Netbox account would you like to use for this demo?" , min_value=2, max_value=st.session_state.num_devices, disabled=not(st.session_state.account_added))
+    min_value= 2
+    max_value= st.session_state.num_devices
+    if max_value < 2: min_value = 0
+    st.session_state.USER_num_total_devices = st.number_input("How many of the available devices in this Netbox account would you like to use for this demo?" , min_value=min_value, max_value=max_value, disabled=not(st.session_state.account_added))
     x = st.session_state.USER_num_total_devices
     max_test_devices = x-1
     help_numtest = "The rest of the devices will be used for training the Agent."
@@ -156,7 +159,8 @@ with right:
     st.session_state.agent_id_field = st.text_input("Enter a unique name for this Agent", disabled=not(st.session_state.account_added))
 
     right_filled = len(st.session_state.agent_id_field) > 0
-    st.button("Train Your Agent", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled))
+    too_little_devices = st.session_state.USER_num_total_devices < 2
+    st.button("Train Your Agent", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(too_little_devices))
 
 # Post training message
 if 'trained' in st.session_state:
