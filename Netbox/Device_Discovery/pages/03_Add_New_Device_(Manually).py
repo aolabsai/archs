@@ -14,12 +14,13 @@ import pandas as pd
 # App Modules
 from Netbox_App import agent_api_call
 
+
 def Recommendation_Callback():            
     # Run Agent API
     INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
-    response = agent_api_call(st.session_state.agent_id, INPUT, st.session_state.api_key)
-    result = response.json()['story']
-    print("RECOMMENDED - " + result)
+    response = agent_api_call(st.session_state.agent_id, INPUT)
+    result = int(response.json()['story'], 2)    
+    print("RECOMMENDED - " + str(result))
 
     st.session_state.recs += 1
     try:
@@ -34,13 +35,13 @@ def Confirm_Recommendation_Callback():
     # Run Agent API
     INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
     LABEL = format(role_id, '010b')
-    response = agent_api_call(st.session_state.agent_id, INPUT, st.session_state.api_key, label=LABEL)
+    response = agent_api_call(st.session_state.agent_id, INPUT, label=LABEL)
     result = response.json()['story']
     print("CONFIRMED - " + result)
-    st.write("Device confirmed; has been trained.") 
+    st.session_state.print_confirm = True
 
 
-## front end
+# Streamlit-powered frontend
 st.title('Netbox Demo - powered by aolabs.ai')
 st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
 st.write("")
@@ -48,14 +49,14 @@ st.markdown("## Manually Add a New Device")
 st.write("")
 st.markdown("Welcome! This is a prototype of a context aware autocomplete AI for local relational data, powered by [aolabs.ai](https://www.aolabs.ai/).")
 
-if 'trained' not in st.session_state:
+if 'account_added' not in st.session_state:
     st.write("")
-    st.text("You have to connect your Netbox account first.")
+    st.write("You have to connect your Netbox account first.")
 
 else:
 
     # generate table of devices to be added / recommended    
-    if st.session_state.new_test_ran is True:
+    if st.session_state.account_added is True:
         test_devices = st.session_state.test_devices_in
         test_devices_table = np.zeros([len(test_devices), 4], dtype='O')
         for i in range(len(test_devices)):
@@ -93,4 +94,6 @@ else:
     # offer USER ability to confirm recommendation and postively reinforce Agent    
     st.write("")
     st.button("Add as new device", on_click= Confirm_Recommendation_Callback)
-    st.write("")
+    if 'print_confirm' in st.session_state:
+        if st.session_state.print_confirm is True: st.write("Device confirmed; Agent has been trained.")
+    st.session_state.print_confirm = False

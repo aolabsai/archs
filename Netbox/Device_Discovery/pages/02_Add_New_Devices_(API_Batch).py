@@ -29,7 +29,7 @@ def Batch_New_Devices_Callback():
         
         # Run Agent API
         INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
-        response = agent_api_call(st.session_state.agent_id, INPUT, st.session_state.api_key)
+        response = agent_api_call(st.session_state.agent_id, INPUT)
         # print(response)
         
         # Calculate results
@@ -53,10 +53,8 @@ def Batch_New_Devices_Callback():
     st.session_state.correct_count = correct_count
     st.session_state.missing_count = missing_count
     
-    st.session_state.new_test_ran = True
+    st.session_state.tested = True
 
-
-st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
 
 # app front end
 st.title('Netbox Demo - powered by aolabs.ai')
@@ -65,6 +63,7 @@ st.write("The agent was trained to predict a device's **role** based on its **ma
 st.write("Click the button below to predict the roles for the devices below, which were reserved for testing")
 st.write("")
 st.markdown("## Programmatically Add New Devices")
+st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
 
 
 if 'trained' not in st.session_state: st.text("You have to connect your Netbox account first.")
@@ -76,8 +75,6 @@ else:
     sites = st.session_state.sites
     types = st.session_state.device_types
     
-    api_key = st.session_state.api_key
-
     test_devices = st.session_state.test_devices_in
     agent_id = st.session_state.agent_id
 
@@ -91,7 +88,7 @@ else:
         devices[i, 2] = d.site.__str__()
         devices[i, 3] = d.device_type.__str__()
         
-        if 'predicted_roles' in st.session_state and st.session_state.new_test_ran is True:
+        if 'predicted_roles' in st.session_state and st.session_state.tested is True:
             devices[i, 4] = st.session_state.predicted_roles_str[i]
         else: # the prediction hasn't been run yet, no results to display
             devices[i, 4] = ""
@@ -101,7 +98,7 @@ else:
     
     st.dataframe(devices_df)
     
-    if st.session_state.new_test_ran is True:
+    if st.session_state.tested is True:
         correct_percentage = (st.session_state.correct_count/len(test_devices))*100
         missing_percentage = (st.session_state.missing_count/len(test_devices))*100
 
