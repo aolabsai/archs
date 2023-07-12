@@ -56,6 +56,7 @@ def add_netbox():
         st.session_state.valid_netbox_apikey = True
         st.session_state.num_devices = len(devices)
         st.session_state.devices = devices
+        st.session_state.minimum_devices = len(devices) >= 2
         for d in devices:
             manufacturers[d.device_type.manufacturer.id] = d.device_type.manufacturer.__str__()
             device_types[d.device_type.id] = d.device_type.__str__()
@@ -66,7 +67,7 @@ def add_netbox():
         st.session_state.account_added = False
         st.session_state.valid_netbox_apikey = False
         st.session_state.num_devices = 2
-        st.session_state.devices = devices
+        st.session_state.devices = devices        
         print(e)
    
     st.session_state.manufacturers = manufacturers
@@ -77,7 +78,8 @@ def add_netbox():
 if 'account_added' not in st.session_state:
     st.session_state.num_devices = 2
     st.session_state.account_added = False
-
+    st.session_state.minimum_devices = False
+    
 
 # Trains an Agent on a Netbox instance, first shuffling the list of devices, and for this demo perparing subsets of devices for training and testing
 def train_agents():
@@ -167,8 +169,7 @@ with right:
     st.session_state.agent_id_field = st.text_input("Enter a unique name for this Agent", disabled=not(st.session_state.account_added))
 
     right_filled = len(st.session_state.agent_id_field) > 0
-    too_little_devices = st.session_state.USER_num_total_devices < 2
-    st.button("Train Your Agent", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(too_little_devices))
+    st.button("Train Your Agent", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices))
 
 # Post training message
 if 'trained' in st.session_state:
