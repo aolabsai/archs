@@ -74,9 +74,8 @@ def add_netbox():
     st.session_state.sites = sites
     st.session_state.roles = roles
 
-
 if 'account_added' not in st.session_state:
-    st.session_state.num_devices = 0
+    st.session_state.num_devices = 2
     st.session_state.account_added = False
 
 
