@@ -54,7 +54,7 @@ def add_netbox():
         devices = list(nb.dcim.devices.all())
         st.session_state.account_added = True
         st.session_state.valid_netbox_apikey = True
-        st.session_state.num_devices = len(st.session_state.devices)
+        st.session_state.num_devices = len(devices)
         st.session_state.devices = devices
         for d in devices:
             manufacturers[d.device_type.manufacturer.id] = d.device_type.manufacturer.__str__()
