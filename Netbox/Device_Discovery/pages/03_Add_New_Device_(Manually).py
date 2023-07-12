@@ -42,14 +42,13 @@ def Confirm_Recommendation_Callback():
 
 
 # Streamlit-powered frontend
-st.title('Netbox Demo - powered by aolabs.ai')
+st.title('Add a New Device -- with AI Agent Assistance')
 st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
+st.write("*Convieved as an autocomplete solution for the [add a new device page on Netbox](https://demo.netbox.dev/dcim/devices/add/)*.")
 st.write("")
-st.markdown("## Manually Add a New Device")
 st.write("")
-st.markdown("Welcome! This is a prototype of a context aware autocomplete AI for local relational data, powered by [aolabs.ai](https://www.aolabs.ai/).")
 
-if 'account_added' not in st.session_state:
+if 'trained' not in st.session_state:
     st.write("")
     st.write("You have to connect your Netbox account first.")
 
@@ -66,9 +65,10 @@ else:
             test_devices_table[i, 2] = d.site.__str__()
             test_devices_table[i, 3] = d.device_type.__str__()
         st.session_state.test_devices_table = pd.DataFrame( test_devices_table, columns=['Name', 'Manufacturer', 'Site', 'Type'])
-    st.markdown("For the purposes of this demo you are a network admin adding the following devices to your current Netbox configuration as you would on [this Netbox page](https://demo.netbox.dev/dcim/devices/add/):")
-    st.write(st.session_state.test_devices_table)
-    st.write("")
+        st.markdown("For the purposes of this demo you are a network admin adding the following devices to your current Netbox configuration as you would on [this Netbox page](https://demo.netbox.dev/dcim/devices/add/):")
+        st.markdown("We hope our AI Agent speeds up your task-- if it makes a mistake, you can train it on the correct prediction and it'll improve (Agents are live-trained).")
+        st.write(st.session_state.test_devices_table)
+        st.write("")
 
     # load session data
     manufacturers = st.session_state.manufacturers

@@ -131,12 +131,13 @@ st.set_page_config(
 )
 st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True)
 st.title('Local AI Agents for Netbox Device Discovery')
-st.write("## demo by [aolabs.ai](https://www.aolabs.ai/)")
+st.write("### *a demo by [aolabs.ai](https://www.aolabs.ai/)*")
 st.write("")
-instruction_md = "### Welcome! \n\
-In testing out a new type of locally trained AI Agents, we applied them to Netbox, specifcally to device discovery.\n\
-  **How it works:** you connect an Agent to a single Netbox instance (enter a netbox url and token); it'll be trained on your list of devices, from the manufacter, type, and site, to infer the role of newly added devices. Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application.\n\
-  After entering the info below to train an Agent, view its predictions in the sidebar as a batch or as an context-aware auto-complete."
+instruction_md = """### Welcome! How this works: \n
+* Connect an Agent to a single Netbox instance (enter a netbox url and token). \n
+* The Agent is trained on the local list of devices --devices' **Manufacters**, **Types**, and **Sites**-- to infer the **Roles** of newly added devices. \n
+* Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application. \n
+* After entering the info below to train an Agent, view its predictions in the sidebar as a batch service or as a context-aware auto-complete."""
 st.markdown(instruction_md)
 
 # Capture USER inputs
@@ -173,9 +174,9 @@ with right:
 
 # Post training message
 if 'trained' in st.session_state:
-    st.write('Agent Training Complete')
-    st.write("From "+st.session_state.nb_USER_url+" via API token: "+st.session_state.nb_USER_api_token)  
+    st.write('***Agent Training Complete***')
+    st.write("From "+st.session_state.nb_USER_url+" via API token: ..."+st.session_state.nb_USER_api_token[-3:])  
     device_count = st.session_state.train_size + len(st.session_state.test_devices_in)
     st.write("")
-    st.write("- {num_devices} devices are being used\n- {num_train} for training the agent\n- {num_test} for testing".format(num_devices=device_count, num_train=st.session_state.train_size, num_test=len(st.session_state.test_devices_in)))
-    st.write("Proceed to testing the Agent by clicking the pages in the sidebar.")
+    st.write("- {num_devices} devices were used\n- {num_train} for training the Agent\n- {num_test} for testing".format(num_devices=device_count, num_train=st.session_state.train_size, num_test=len(st.session_state.test_devices_in)))
+    st.write("View the Agent's performance by clicking the pages in the sidebar.")

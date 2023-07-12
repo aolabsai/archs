@@ -57,13 +57,13 @@ def Batch_New_Devices_Callback():
 
 
 # app front end
-st.title('Netbox Demo - powered by aolabs.ai')
-st.write("")
-st.write("The agent was trained to predict a device's **role** based on its **manufacturer**, **type**, and **site**")
-st.write("Click the button below to predict the roles for the devices below, which were reserved for testing")
-st.write("")
-st.markdown("## Programmatically Add New Devices")
+st.title('Add a New Device -- with AI Agent Assistance')
 st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
+st.write("*Convieved as an API solution for the [bulk import new devices page on Netbox](https://demo.netbox.dev/dcim/devices/import/).*")
+st.write("")
+st.write("Click the button below to batch-predict the Roles for these new devices.")
+st.write("On Local via API: Agents are designed to be hosted locally; they're super lightweight (the Agents in this app are only 40 neurons/parameters).The API is provided as a quick test bed and we are happy to accomdate local / on-prem needs.")
+st.write("")
 
 
 if 'trained' not in st.session_state: st.text("You have to connect your Netbox account first.")
@@ -105,4 +105,3 @@ else:
         st.write("Out of "+str(len(test_devices))+" devices added, the role was predicted correctly "+str(st.session_state.correct_count)+" times out of "+str(len(test_devices))+".")
         st.write("Or "+str(correct_percentage)+" %.")
         st.write("Also, there were no predictions "+str(st.session_state.missing_count)+" times, or "+str(missing_percentage)+" %.")   
-
