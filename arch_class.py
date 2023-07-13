@@ -24,7 +24,7 @@ Thank you for your curiosity!
 description = "Basic Clam"
 arch_i = [1, 1, 1]     # corresponding to Food, Chemical-A, Chemical-B (present=1/not=0)
 arch_z = [1]           # corresponding to Open=1/Close=0
-arch_c = [1]            # 4 c neurons are included in the default first channel-- 0-label, 1-force_positive, 2-force_negative, 3-default pleasure instinct triggered when I__flat[0]=1 and Z of previous step Z__flat[0]=1
+arch_c = []            # 4 c neurons are included in the default first channel-- 0-label, 1-force_positive, 2-force_negative, 3-default pleasure instinct triggered when I__flat[0]=1 and Z of previous step Z__flat[0]=1
 connector_function = "full_conn"
 
 
@@ -217,15 +217,15 @@ class Arch(object):
         
             for Channel in self.Q:
                 for n in Channel:
-                    self.datamatrix[1, n] = sorted(rn.sample(self.I__flat, q_in_conn))
-                    self.datamatrix[2, n] = sorted(rn.sample(self.Q__flat, q_ne_conn))
+                    self.datamatrix[1, n] = sorted(rn.sample(list(self.I__flat), q_in_conn))
+                    self.datamatrix[2, n] = sorted(rn.sample(list(self.Q__flat), q_ne_conn))
                     self.datamatrix[3, n] = sorted(self.C__flat)
                     self.datamatrix[4, n] = n - sum(self.q)
                     
             for Channel in self.Z:
                 for n in Channel:
-                    self.datamatrix[1, n] = sorted(rn.sample(self.Q__flat, z_in_conn))
-                    self.datamatrix[2, n] = sorted(rn.sample(self.Z__flat, z_ne_conn))
+                    self.datamatrix[1, n] = sorted(rn.sample(list(self.Q__flat), z_in_conn))
+                    self.datamatrix[2, n] = sorted(rn.sample(list(self.Z__flat), z_ne_conn))
                     self.datamatrix[3, n] = sorted(self.C__flat)
                     self.datamatrix[4, n] = n
                 
