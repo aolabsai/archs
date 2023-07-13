@@ -1,23 +1,47 @@
+# -*- coding: utf-8 -*-
+"""
+// aolabs.ai software >ao_core/Arch.py (C) 2023 Animo Omnis Corporation. All Rights Reserved.
 
-import numpy as np
-import random as rn
+Open source; temporarily under the MIT liscence as per the README.md in parent repository; final lisence and more info TBD at aolabs.ai/strategy.
 
+Thank you for your curiosity!
+"""
+
+## // About :: https://docs.aolabs.ai/docs/arch-config
+#
+# This class defines the Agent Architecture logic used to configure Agents, comprised of 2 components: 
+#    1) how many binary neurons to encode your input-output assocations (required),
+#    2) How those neurons are connected (optional, more advanced-- best to start with the default of fully-connected network of neurons and them trim down)
+#
+# For interactive visual representation of Archs: https://miro.com/app/board/uXjVM_kESvI=/?share_link_id=72701488535
+#
+# We eagerly welcome contributors who relate to these ideas. :)
+#
+#
+##############################################################################
+# Reference Archs for Testing
 
 description = "Basic Clam"
 arch_i = [1, 1, 1]     # corresponding to Food, Chemical-A, Chemical-B (present=1/not=0)
 arch_z = [1]           # corresponding to Open=1/Close=0
 arch_c = [1]            # 4 c neurons are included in the default first channel-- 0-label, 1-force_positive, 2-force_negative, 3-default pleasure instinct triggered when I__flat[0]=1 and Z of previous step Z__flat[0]=1
-connector_function = "forward_forward_conn"
+connector_function = "full_conn"
 
 
 # description = "Netbox device type relational autocomplete (10 binary digits per field to encode ids)"
 # arch_i = [10, 10, 10]
 # arch_z = [10]
 # arch_c = []
-# connector_function = "full_conn"
+# connector_function = "forward_full_conn"
 
 
 ##############################################################################
+# Arch Class
+
+# 3rd Party Modules
+import numpy as np
+import random as rn
+
 
 class Arch(object):
     """Arch constructor class."""
