@@ -65,8 +65,8 @@ else:
             test_devices_table[i, 2] = d.site.__str__()
             test_devices_table[i, 3] = d.device_type.__str__()
         st.session_state.test_devices_table = pd.DataFrame( test_devices_table, columns=['Name', 'Manufacturer', 'Site', 'Type'])
-        st.markdown("For the purposes of this demo you are a network admin adding the following devices to your current Netbox configuration as you would on [this Netbox page](https://demo.netbox.dev/dcim/devices/add/):")
-        st.markdown("We hope our AI Agent speeds up your task-- if it makes a mistake, you can train it on the correct prediction and it'll improve (Agents are live-trained).")
+        st.markdown("Sometimes you're given a list of device to add manually to Netbox; can your Agent help speed up your task?")
+        st.markdown("If your Agent makes a mistake, you can train it on the correct information-- Agents learn without a distinct gap between training and inference.")
         st.write(st.session_state.test_devices_table)
         st.write("")
 
@@ -77,10 +77,11 @@ else:
     types = st.session_state.device_types  
 
     # USER input fields    
-    manufacturer_selected = st.selectbox('Manufacturer *', list(manufacturers.values()))
-    site_selected = st.selectbox('Site *', list(sites.values()))
-    type_selected = st.selectbox("Type *", list(types.values()))
-    role_selected = st.selectbox('Device Role *', list(roles.values()))
+    st.write("### Enter Info of New Device:")
+    manufacturer_selected = st.selectbox('Manufacturer', list(manufacturers.values()))
+    site_selected = st.selectbox('Site', list(sites.values()))
+    type_selected = st.selectbox("Type", list(types.values()))
+    role_selected = st.selectbox('Device Role', list(roles.values()))
 
     #converting user input to IDs
     manufacturer_id = list(manufacturers.keys())[list(manufacturers.values()).index(manufacturer_selected)]
@@ -93,7 +94,7 @@ else:
 
     # offer USER ability to confirm recommendation and postively reinforce Agent    
     st.write("")
-    st.button("Add as new device", on_click= Confirm_Recommendation_Callback)
+    st.button("Confirm Device & Add to Agent's Training", on_click= Confirm_Recommendation_Callback)
     if 'print_confirm' in st.session_state:
         if st.session_state.print_confirm is True: st.write("Device confirmed; Agent has been trained.")
     st.session_state.print_confirm = False

@@ -57,7 +57,7 @@ def Batch_New_Devices_Callback():
 
 
 # app front end
-st.title('Add a New Device -- with AI Agent Assistance')
+st.title('Bulk Import New Devices -- with AI Agent Assistance')
 st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
 st.write("*Convieved as an API solution for the [bulk import new devices page on Netbox](https://demo.netbox.dev/dcim/devices/import/).*")
 st.write("")
