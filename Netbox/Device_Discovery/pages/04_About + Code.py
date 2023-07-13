@@ -1,10 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Page 3 of App - Netbox Device Discovery
+Page 4 of App - Netbox Device Discovery
 
-Purpose: to display the results of an Agent's deivce role prediction as an autofill recommender that can be live-trained
+Purpose: Helpful links and about
 
 """
+
+# 3rd Party Modules
 import streamlit as st
 
 # Streamlit-powered frontend

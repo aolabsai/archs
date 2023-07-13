@@ -8,11 +8,10 @@ Purpose: to display the results of an Agent's deivce role predictions
 
 # 3rd Party Modules
 import numpy as np
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
-
-from Netbox_App import agent_api_call
+from Main_Page import agent_api_call
 
 #show results button from first page?
 def Batch_New_Devices_Callback():

@@ -7,12 +7,11 @@ Purpose: to display the results of an Agent's deivce role prediction as an autof
 """
 
 # 3rd Party Modules
-import streamlit as st
 import numpy as np
 import pandas as pd
+import streamlit as st
 
-# App Modules
-from Netbox_App import agent_api_call
+from Main_Page import agent_api_call
 
 
 def Recommendation_Callback():            
