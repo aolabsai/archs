@@ -38,9 +38,8 @@ def agent_api_call(agent_id, input_dat, label=None):
     response = requests.post(url, json=payload, headers=headers)
     return response
 
-
+#save {id: attribute} dicts of device and other info to session_state
 def add_netbox():
-    #save {id: attribute} dicts of device info to session_state
     manufacturers = {}
     device_types = {}
     sites = {}
@@ -134,10 +133,10 @@ st.title('Local AI Agents for Netbox Device Discovery')
 st.write("### *a demo by [aolabs.ai](https://www.aolabs.ai/)*")
 st.write("")
 instruction_md = """### Welcome! How this works: \n
-* Connect an Agent to a single Netbox instance (enter a netbox url and token). \n
-* The Agent is trained on the local list of devices --devices' **Manufacters**, **Types**, and **Sites**-- to infer the **Roles** of newly added devices. \n
-* Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application. \n
-* After entering the info below to train an Agent, view its predictions in the sidebar as a batch service or as a context-aware auto-complete."""
+* Connect an Agent to a single Netbox instance (enter a netbox url and api token); you can try the (public Netbox demo)[https://demo.netbox.dev/]\n
+* The Agent is trained on the local list of devices --devices' **Manufacters**, **Types**, and **Sites**-- to infer the **Roles** of newly added devices \n
+* Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application; this demo presents them as a snapshot \n
+* After entering the info below to train an Agent, view its predictions in the sidebar as a *bulk import service* or as a *context-aware auto-complete*."""
 st.markdown(instruction_md)
 
 # Capture USER inputs

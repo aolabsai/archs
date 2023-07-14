@@ -9,11 +9,12 @@ Main Page - Basic Clam Test Bed
 import numpy as np
 import streamlit as st
 import requests
-
 from PIL import Image
 from urllib.request import urlopen
 
-def agent_api_call(agent_id, input_dat, api_key, label=None):
+
+# Returns json, result stored in json as Agent's 'story'
+def agent_api_call(agent_id, input_dat, label=None):
     url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel/agent"
 
     payload = {
@@ -30,7 +31,7 @@ def agent_api_call(agent_id, input_dat, api_key, label=None):
     headers = {
         "accept": "application/json",
         "content-type": "application/json",
-        "X-API-KEY": api_key
+        "X-API-KEY": st.secrets["aolabs_api_key"]
     }
 
     response = requests.post(url, json=payload, headers=headers)
@@ -51,9 +52,6 @@ st.set_page_config(
     }
 )
 
-#using preset api key for now
-api_key = 'buildBottomUpRealAGI'
-st.session_state.api_key = api_key  
 
 # App Front End
 st.title('AO Labs v0.1.0 Clam Demo')
@@ -109,7 +107,7 @@ def run_agent():
     
     responses = []
     for x in np.arange(user_STATES):
-        response= agent_api_call(st.session_state.agent_id, INPUT, api_key, label=LABEL)        
+        response= agent_api_call(st.session_state.agent_id, INPUT, label=LABEL)        
         print(response)
         print([int(response.json()['story'])])
         responses += [int(response.json()['story'])]

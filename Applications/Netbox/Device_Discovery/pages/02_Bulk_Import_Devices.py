@@ -61,11 +61,11 @@ st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/deve
 st.write("*Convieved as an API solution for the [bulk import new devices page on Netbox](https://demo.netbox.dev/dcim/devices/import/).*")
 st.write("")
 st.write("Click the button below to batch-predict the Roles for these new devices.")
-st.write("On Local via API: Agents are designed to be hosted locally; they're super lightweight (the Agents in this app are only 40 neurons/parameters).The API is provided as a quick test bed and we are happy to accomdate local / on-prem needs.")
+st.write("*Running Agents Locally vs via the API:* Agents are designed to be hosted locally; they're super lightweight (the Agents in this app are only 40 neurons/parameters).The API is provided as a quick test bed and we are happy to accomdate local / on-prem needs.")
 st.write("")
 
 
-if 'trained' not in st.session_state: st.text("You have to connect your Netbox account first.")
+if 'trained' not in st.session_state: st.text("You have to connect your Netbox account and Agent first.")
 
 else:
     # load session data
@@ -77,7 +77,7 @@ else:
     test_devices = st.session_state.test_devices_in
     agent_id = st.session_state.agent_id
 
-    st.button("Add this batch of new (test) devices", on_click= Batch_New_Devices_Callback, type="primary")
+    st.button("Predict **Roles** for this batch of new (test) devices", on_click= Batch_New_Devices_Callback, type="primary")
     
     devices = np.zeros([len(test_devices), 6], dtype='O')
     for i in range(len(test_devices)):
