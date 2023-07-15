@@ -43,57 +43,69 @@ def Confirm_Recommendation_Callback():
 # Streamlit-powered frontend
 st.title('Add a New Device -- with AI Agent Assistance')
 st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
-st.write("*Convieved as an autocomplete solution for the [add a new device page on Netbox](https://demo.netbox.dev/dcim/devices/add/)*.")
-st.write("")
-st.write("")
 
-if 'trained' not in st.session_state:
+
+left_big, right_big = st.columns([0.7, 0.3])
+
+with right_big:
+    st.image("https://i.imgur.com/4ufNVr1.png")
+    st.markdown("Screenshot from demo.netbox.dev")    
+    # with st.expander("See Agent's Arch (Configuration)"):
+    #     arch_visual_miro_html= """<iframe width="768" height="432" src="https://miro.com/app/live-embed/uXjVM_kESvI=/?moveToViewport=121907,-48157,16256,9923&embedId=323274877415" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>"""
+    #     st.write(arch_visual_miro_html, unsafe_allow_html=True)
+
+with left_big:
+    st.write("*Convieved as an autocomplete solution for the [add a new device page on Netbox](https://demo.netbox.dev/dcim/devices/add/)*.")
     st.write("")
-    st.write("You have to connect your Netbox account first.")
-
-else:
-
-    # generate table of devices to be added / recommended    
-    if st.session_state.account_added is True:
-        test_devices = st.session_state.test_devices_in
-        test_devices_table = np.zeros([len(test_devices), 4], dtype='O')
-        for i in range(len(test_devices)):
-            d = test_devices[i]
-            test_devices_table[i, 0] = d.__str__()
-            test_devices_table[i, 1] = d.device_type.manufacturer.__str__()
-            test_devices_table[i, 2] = d.site.__str__()
-            test_devices_table[i, 3] = d.device_type.__str__()
-        st.session_state.test_devices_table = pd.DataFrame( test_devices_table, columns=['Name', 'Manufacturer', 'Site', 'Type'])
-        st.markdown("Sometimes you're given a list of device to add manually to Netbox; can your Agent help speed up your task?")
-        st.markdown("If your Agent makes a mistake, you can train it on the correct information-- Agents learn without a distinct gap between training and inference.")
-        st.write(st.session_state.test_devices_table)
-        st.write("")
-
-    # load session data
-    manufacturers = st.session_state.manufacturers
-    roles = st.session_state.roles
-    sites = st.session_state.sites
-    types = st.session_state.device_types  
-
-    # USER input fields    
-    st.write("### Enter Info of New Device:")
-    manufacturer_selected = st.selectbox('Manufacturer', list(manufacturers.values()))
-    site_selected = st.selectbox('Site', list(sites.values()))
-    type_selected = st.selectbox("Type", list(types.values()))
-    role_selected = st.selectbox('Device Role', list(roles.values()))
-
-    #converting user input to IDs
-    manufacturer_id = list(manufacturers.keys())[list(manufacturers.values()).index(manufacturer_selected)]
-    site_id = list(sites.keys())[list(sites.values()).index(site_selected)]
-    type_id = list(types.keys())[list(types.values()).index(type_selected)]
-    role_id = list(roles.keys())[list(roles.values()).index(role_selected)]
+    st.write("")
     
-    # recommend a device whenever any input changes on this page
-    Recommendation_Callback()
-
-    # offer USER ability to confirm recommendation and postively reinforce Agent    
-    st.write("")
-    st.button("Confirm Device & Add to Agent's Training", on_click= Confirm_Recommendation_Callback)
-    if 'print_confirm' in st.session_state:
-        if st.session_state.print_confirm is True: st.write("Device confirmed; Agent has been trained.")
-    st.session_state.print_confirm = False
+    if 'trained' not in st.session_state:
+        st.write("")
+        st.write("You have to connect your Netbox account first.")
+    
+    else:
+    
+        # generate table of devices to be added / recommended    
+        if st.session_state.account_added is True:
+            test_devices = st.session_state.test_devices_in
+            test_devices_table = np.zeros([len(test_devices), 4], dtype='O')
+            for i in range(len(test_devices)):
+                d = test_devices[i]
+                test_devices_table[i, 0] = d.__str__()
+                test_devices_table[i, 1] = d.device_type.manufacturer.__str__()
+                test_devices_table[i, 2] = d.site.__str__()
+                test_devices_table[i, 3] = d.device_type.__str__()
+            st.session_state.test_devices_table = pd.DataFrame( test_devices_table, columns=['Name', 'Manufacturer', 'Site', 'Type'])
+            st.markdown("Sometimes you're given a list of device to add manually to Netbox; can your Agent help speed up your task?")
+            st.markdown("If your Agent makes a mistake, you can train it on the correct information-- Agents learn without a distinct gap between training and inference.")
+            st.write(st.session_state.test_devices_table)
+            st.write("")
+    
+        # load session data
+        manufacturers = st.session_state.manufacturers
+        roles = st.session_state.roles
+        sites = st.session_state.sites
+        types = st.session_state.device_types  
+    
+        # USER input fields    
+        st.write("### Enter Info of New Device:")
+        manufacturer_selected = st.selectbox('Manufacturer', list(manufacturers.values()))
+        site_selected = st.selectbox('Site', list(sites.values()))
+        type_selected = st.selectbox("Type", list(types.values()))
+        role_selected = st.selectbox('Device Role', list(roles.values()))
+    
+        #converting user input to IDs
+        manufacturer_id = list(manufacturers.keys())[list(manufacturers.values()).index(manufacturer_selected)]
+        site_id = list(sites.keys())[list(sites.values()).index(site_selected)]
+        type_id = list(types.keys())[list(types.values()).index(type_selected)]
+        role_id = list(roles.keys())[list(roles.values()).index(role_selected)]
+        
+        # recommend a device whenever any input changes on this page
+        Recommendation_Callback()
+    
+        # offer USER ability to confirm recommendation and postively reinforce Agent    
+        st.write("")
+        st.button("Confirm Device & Add to Agent's Training", on_click= Confirm_Recommendation_Callback)
+        if 'print_confirm' in st.session_state:
+            if st.session_state.print_confirm is True: st.write("Device confirmed; Agent has been trained.")
+        st.session_state.print_confirm = False

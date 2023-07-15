@@ -29,7 +29,7 @@ def Batch_New_Devices_Callback():
         # Run Agent API
         INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
         response = agent_api_call(st.session_state.agent_id, INPUT)
-        # print(response)
+        print(response)
         
         # Calculate results
         story = response.json()['story']
@@ -58,49 +58,64 @@ def Batch_New_Devices_Callback():
 # app front end
 st.title('Bulk Import New Devices -- with AI Agent Assistance')
 st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
-st.write("*Convieved as an API solution for the [bulk import new devices page on Netbox](https://demo.netbox.dev/dcim/devices/import/).*")
-st.write("")
-st.write("Click the button below to batch-predict the Roles for these new devices.")
-st.write("*Running Agents Locally vs via the API:* Agents are designed to be hosted locally; they're super lightweight (the Agents in this app are only 40 neurons/parameters).The API is provided as a quick test bed and we are happy to accomdate local / on-prem needs.")
-st.write("")
 
 
-if 'trained' not in st.session_state: st.text("You have to connect your Netbox account and Agent first.")
+left_big, right_big = st.columns([0.7, 0.3])
 
-else:
-    # load session data
-    manufacturers = st.session_state.manufacturers
-    roles = st.session_state.roles
-    sites = st.session_state.sites
-    types = st.session_state.device_types
+with right_big:
+    st.image("https://i.imgur.com/m2Aws1v.png")
+    st.markdown("Screenshot from demo.netbox.dev")    
+    # with st.expander("See Agent's Arch (Configuration)"):
+    #     arch_visual_miro_html= """<iframe width="768" height="432" src="https://miro.com/app/live-embed/uXjVM_kESvI=/?moveToViewport=121907,-48157,16256,9923&embedId=323274877415" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>"""
+    #     st.write(arch_visual_miro_html, unsafe_allow_html=True)
+
+with left_big:
+
+    st.write("*Convieved as an API solution for the [bulk import new devices page on Netbox](https://demo.netbox.dev/dcim/devices/import/).*")
+    st.write("")
+    st.write("Click the button below to batch-predict the Roles for these new devices.")
+    st.write("*Running Agents Locally vs via the API:* Agents are designed to be hosted locally; they're super lightweight (the Agents in this app are only 40 neurons/parameters).The API is provided as a quick test bed and we are happy to accomdate local / on-prem needs.")
+    st.write("")
     
-    test_devices = st.session_state.test_devices_in
-    agent_id = st.session_state.agent_id
-
-    st.button("Predict **Roles** for this batch of new (test) devices", on_click= Batch_New_Devices_Callback, type="primary")
+    if 'trained' not in st.session_state: st.text("You have to connect your Netbox account and Agent first.")
     
-    devices = np.zeros([len(test_devices), 6], dtype='O')
-    for i in range(len(test_devices)):
-        d = test_devices[i]
-        devices[i, 0] = d.__str__()
-        devices[i, 1] = d.device_type.manufacturer.__str__()
-        devices[i, 2] = d.site.__str__()
-        devices[i, 3] = d.device_type.__str__()
+    else:
+        # load session data
+        manufacturers = st.session_state.manufacturers
+        roles = st.session_state.roles
+        sites = st.session_state.sites
+        types = st.session_state.device_types
         
-        if 'predicted_roles' in st.session_state and st.session_state.tested is True:
-            devices[i, 4] = st.session_state.predicted_roles_str[i]
-        else: # the prediction hasn't been run yet, no results to display
-            devices[i, 4] = ""
-        devices[i, 5] = roles[d.device_role.id]
+        test_devices = st.session_state.test_devices_in
+        agent_id = st.session_state.agent_id
     
-    devices_df = pd.DataFrame( devices, columns=['Name', 'Manufacturer', 'Site', 'Type', 'PREDICTED ROLE', 'EXPECTED ROLE'])
+        st.button("Predict **Roles** for this batch of new (test) devices", on_click= Batch_New_Devices_Callback, type="primary")
+        
+        devices = np.zeros([len(test_devices), 6], dtype='O')
+        for i in range(len(test_devices)):
+            d = test_devices[i]
+            devices[i, 0] = d.__str__()
+            devices[i, 1] = d.device_type.manufacturer.__str__()
+            devices[i, 2] = d.site.__str__()
+            devices[i, 3] = d.device_type.__str__()
+            
+            if 'predicted_roles' in st.session_state and st.session_state.tested is True:
+                devices[i, 4] = st.session_state.predicted_roles_str[i]
+            else: # the prediction hasn't been run yet, no results to display
+                devices[i, 4] = ""
+            devices[i, 5] = roles[d.device_role.id]
+        
+        devices_df = pd.DataFrame( devices, columns=['Name', 'Manufacturer', 'Site', 'Type', 'PREDICTED ROLE', 'EXPECTED ROLE'])
+        
+
+if 'trained' in st.session_state:
     
     st.dataframe(devices_df)
     
     if st.session_state.tested is True:
         correct_percentage = (st.session_state.correct_count/len(test_devices))*100
         missing_percentage = (st.session_state.missing_count/len(test_devices))*100
-
+    
         st.write("Out of "+str(len(test_devices))+" devices added, the role was predicted correctly "+str(st.session_state.correct_count)+" times out of "+str(len(test_devices))+".")
         st.write("Or "+str(correct_percentage)+" %.")
         st.write("Also, there were no predictions "+str(st.session_state.missing_count)+" times, or "+str(missing_percentage)+" %.")   

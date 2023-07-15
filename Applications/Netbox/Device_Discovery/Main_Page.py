@@ -132,44 +132,55 @@ st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/deve
 st.title('Local AI Agents for Netbox Device Discovery')
 st.write("### *a demo by [aolabs.ai](https://www.aolabs.ai/)*")
 st.write("")
-instruction_md = """### Welcome! How this works: \n
-* Connect an Agent to a single Netbox instance (enter a netbox url and api token); you can try the (public Netbox demo)[https://demo.netbox.dev/]\n
-* The Agent is trained on the local list of devices --devices' **Manufacters**, **Types**, and **Sites**-- to infer the **Roles** of newly added devices \n
-* Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application; this demo presents them as a snapshot \n
+
+left_big, right_big = st.columns([0.7, 0.3])
+
+with right_big:
+    st.image("https://i.imgur.com/eZyVouO.png")
+    st.markdown("Screenshot of the Netbox Devices' UI: [demo.netbox.dev/dcim/devices/](https://demo.netbox.dev/dcim/devices/), username/password admin/admin")    
+    # with st.expander("See Agent's Arch (Configuration)"):
+    #     arch_visual_miro_html= """<iframe width="768" height="432" src="https://miro.com/app/live-embed/uXjVM_kESvI=/?moveToViewport=121907,-48157,16256,9923&embedId=323274877415" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>"""
+    #     st.write(arch_visual_miro_html, unsafe_allow_html=True)
+
+with left_big:
+    instruction_md = """### Welcome! How this works: \n
+* Connect an Agent to a single Netbox account (enter a netbox url and api token); you can try the [public Netbox demo](https://demo.netbox.dev/)\n
+* The Agent is trained on the account's local list of network devices' **:green[Manufacters]**, **:green[Types]**, and **:green[Sites]**-- to infer the ***:red[Roles]*** of newly discovered devices instead of a manual determination\n
+* Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application; this demo presents them as a snapshot\n
 * After entering the info below to train an Agent, view its predictions in the sidebar as a *bulk import service* or as a *context-aware auto-complete*."""
-st.markdown(instruction_md)
+    st.markdown(instruction_md)    
 
-# Capture USER inputs
-left, right = st.columns(2)
-
-## Netbox account
-with left:
-    st.session_state.nb_USER_url = st.text_input('Enter your Netbox account URL:', "https://demo.netbox.dev/")
-    help_netbox_api = "Get your Netbox API key from {your Netbox url}/user/api-tokens/; for instance from the Netbox public demo by logging in to [demo.netbox.dev](https://demo.netbox.dev/user/api-tokens/) with username *admin* and password *admin*."
-    st.session_state.nb_USER_api_token = st.text_input('Enter your Netbox account API token:',  type='password', help=help_netbox_api)
-
-    left_filled = len(st.session_state.nb_USER_url) > 0 and len(st.session_state.nb_USER_api_token) > 0
-    st.button("Connect Netbox Account", type="primary", on_click=add_netbox, disabled=not(left_filled))
-       
-    if 'account_added' in st.session_state:
-        if st.session_state.account_added is True:
-            st.write("Agent connected; there {} devices on this Netbox account available for training/testing.".format(st.session_state.num_devices))
-        
-    if 'valid_netbox_apikey' in st.session_state:
-        if st.session_state.valid_netbox_apikey is False:
-            st.write("Imporer Netbox API key-- please try again.")
-
-## Training and test configuration
-with right:
-    st.session_state.USER_num_total_devices = st.number_input("How many of the available devices in this Netbox account would you like to use for this demo?" , min_value=2, max_value=st.session_state.num_devices, disabled=not(st.session_state.account_added))
-    x = st.session_state.USER_num_total_devices
-    max_test_devices = x-1
-    help_numtest = "The rest of the devices will be used for training the Agent."
-    st.session_state.USER_num_test_devices = st.number_input("Of those ("+str(x)+") devices, how many should be withheld to TEST the Agent?" , min_value=1, max_value=max_test_devices, disabled=not(st.session_state.account_added), help=help_numtest)
-    st.session_state.agent_id_field = st.text_input("Enter a unique name for this Agent", disabled=not(st.session_state.account_added))
-
-    right_filled = len(st.session_state.agent_id_field) > 0
-    st.button("Train Your Agent", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices))
+    # Capture USER inputs
+    left, right = st.columns(2)
+    
+    ## Netbox account
+    with left:
+        st.session_state.nb_USER_url = st.text_input('Enter your Netbox account URL:', "https://demo.netbox.dev/")
+        help_netbox_api = "Get your Netbox API key from {your Netbox url}/user/api-tokens/; for instance from the Netbox public demo by logging in to [demo.netbox.dev](https://demo.netbox.dev/user/api-tokens/) with username *admin* and password *admin*."
+        st.session_state.nb_USER_api_token = st.text_input('Enter your Netbox account API token:',  type='password', help=help_netbox_api)
+    
+        left_filled = len(st.session_state.nb_USER_url) > 0 and len(st.session_state.nb_USER_api_token) > 0
+        st.button("Connect Netbox Account", type="primary", on_click=add_netbox, disabled=not(left_filled))
+           
+        if 'account_added' in st.session_state:
+            if st.session_state.account_added is True:
+                st.write("Agent connected; there {} devices on this Netbox account available for training/testing.".format(st.session_state.num_devices))
+            
+        if 'valid_netbox_apikey' in st.session_state:
+            if st.session_state.valid_netbox_apikey is False:
+                st.write("Imporer Netbox API key-- please try again.")
+    
+    ## Training and test configuration
+    with right:
+        st.session_state.USER_num_total_devices = st.number_input("How many of the available devices in this Netbox account would you like to use for this demo?" , min_value=2, max_value=st.session_state.num_devices, disabled=not(st.session_state.account_added))
+        x = st.session_state.USER_num_total_devices
+        max_test_devices = x-1
+        help_numtest = "The rest of the devices will be used for training the Agent."
+        st.session_state.USER_num_test_devices = st.number_input("Of those ("+str(x)+") devices, how many should be withheld to TEST the Agent?" , min_value=1, max_value=max_test_devices, disabled=not(st.session_state.account_added), help=help_numtest)
+        st.session_state.agent_id_field = st.text_input("Enter a unique name for this Agent", disabled=not(st.session_state.account_added))
+    
+        right_filled = len(st.session_state.agent_id_field) > 0
+        st.button("Train Your Agent", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices))
 
 # Post training message
 if 'trained' in st.session_state:
