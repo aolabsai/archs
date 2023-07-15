@@ -57,7 +57,22 @@ def Batch_New_Devices_Callback():
 
 # app front end
 st.title('Bulk Import New Devices -- with AI Agent Assistance')
-st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
+
+# side bar content
+if "Agents" not in st.session_state:
+    st.session_state["Agents"] = {}
+if st.session_state.account_added is False:
+    data_source = "**Data Source:** :red[*Connect a Netbox Account*]" 
+elif st.session_state.account_added:
+    data_source = "**Data Source:** :green["+st.session_state.nb_USER_url+"]"    
+if 'agent_id' not in st.session_state:
+    active_agent = "**Active Agent:** :red[*No Agent Yet*]"
+else:
+    active_agent = "**Active Agent:** :violet["+st.session_state.agent_id+"]"
+with st.sidebar:    
+    st.write(data_source)
+    st.write(active_agent)
+st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True)
 
 
 left_big, right_big = st.columns([0.7, 0.3])
@@ -106,14 +121,18 @@ with left_big:
         
         devices_df = pd.DataFrame( devices, columns=['Name', 'Manufacturer', 'Site', 'Type', 'PREDICTED ROLE', 'EXPECTED ROLE'])
 
-if 'trained' in st.session_state:
-    
-    st.dataframe(devices_df)
-    
-    if st.session_state.tested is True:
-        correct_percentage = (st.session_state.correct_count/len(test_devices))*100
-        missing_percentage = (st.session_state.missing_count/len(test_devices))*100
-    
-        st.write("Out of "+str(len(test_devices))+" devices added, the role was predicted correctly "+str(st.session_state.correct_count)+" times out of "+str(len(test_devices))+".")
-        st.write("Or "+str(correct_percentage)+" %.")
-        st.write("Also, there were no predictions "+str(st.session_state.missing_count)+" times, or "+str(missing_percentage)+" %.")   
+    if 'trained' in st.session_state:
+        
+        st.dataframe(devices_df)
+        
+        if st.session_state.tested is True:
+            correct_percentage = (st.session_state.correct_count/len(test_devices))*100
+            missing_percentage = (st.session_state.missing_count/len(test_devices))*100
+            
+            st.session_state.Agents[ st.session_state.agent_id ][ 'accuracy (bulk)' ] = str(correct_percentage)
+            st.session_state.Agents[ st.session_state.agent_id ][ 'no guesses (bulk)' ] = str(missing_percentage)
+            
+        
+            st.write("Out of "+str(len(test_devices))+" devices added, the role was predicted correctly "+str(st.session_state.correct_count)+" times out of "+str(len(test_devices))+".")
+            st.write("Or "+str(correct_percentage)+" %.")
+            st.write("Also, there were no predictions "+str(st.session_state.missing_count)+" times, or "+str(missing_percentage)+" %.")   

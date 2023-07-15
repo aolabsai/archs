@@ -42,7 +42,22 @@ def Confirm_Recommendation_Callback():
 
 # Streamlit-powered frontend
 st.title('Add a New Device -- with AI Agent Assistance')
-st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True) 
+
+# side bar content
+if "Agents" not in st.session_state:
+    st.session_state["Agents"] = {}
+if st.session_state.account_added is False:
+    data_source = "**Data Source:** :red[*Connect a Netbox Account*]" 
+elif st.session_state.account_added:
+    data_source = "**Data Source:** :green["+st.session_state.nb_USER_url+"]"    
+if 'agent_id' not in st.session_state:
+    active_agent = "**Active Agent:** :red[*No Agent Yet*]"
+else:
+    active_agent = "**Active Agent:** :violet["+st.session_state.agent_id+"]"
+with st.sidebar:    
+    st.write(data_source)
+    st.write(active_agent)
+st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True)
 
 
 left_big, right_big = st.columns([0.7, 0.3])

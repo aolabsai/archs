@@ -9,8 +9,6 @@ Main Page - Netbox Device Discovery
 import numpy as np
 import streamlit as st
 import requests
-from PIL import Image
-from urllib.request import urlopen
 import pynetbox  # Netbox interface
 
 
@@ -112,14 +110,22 @@ def train_agents():
     st.session_state.tested = False
     st.session_state.recs = 0
     st.session_state.mistakes = 0
+    
+    Agent = {
+        'trained': str(st.session_state.trained)+" - "+str(len(train_devices_in)),
+        'tested (bulk)': str(st.session_state.tested)+" - "+str(test_size),
+        'accuracy (bulk)': "",
+        'no guesses (bulk)': "",
+        'recs (autocomplete)': str(st.session_state.recs),
+        'mistakes (autocomplete)': str(st.session_state.mistakes),
+        }
+    st.session_state.Agents[ st.session_state.agent_id ] = Agent
 
 
 # Streamlit-powered frontend
-url2 = "https://i.imgur.com/j3jalQE.png"
-favicon = Image.open(urlopen(url2))
 st.set_page_config(
     page_title="Local Device Discovery AI Agent - demo by aolabs.ai",
-    page_icon=favicon,
+    page_icon="https://i.imgur.com/j3jalQE.png",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
@@ -128,11 +134,27 @@ st.set_page_config(
         'About': "This is a demo of our AI features. Check out www.aolabs.ai and docs.aolabs.ai for more. Thank you!"
     }
 )
-st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True)
 st.title('Local AI Agents for Netbox Device Discovery')
 st.write("### *a demo by [aolabs.ai](https://www.aolabs.ai/)*")
 st.write("")
 
+# side bar content
+if "Agents" not in st.session_state:
+    st.session_state["Agents"] = {}
+if st.session_state.account_added is False:
+    data_source = "**Data Source:** :red[*Connect a Netbox Account*]" 
+elif st.session_state.account_added:
+    data_source = "**Data Source:** :green["+st.session_state.nb_USER_url+"]"    
+if 'agent_id' not in st.session_state:
+    active_agent = "**Active Agent:** :red[*No Agent Yet*]"
+else:
+    active_agent = "**Active Agent:** :violet["+st.session_state.agent_id+"]"
+with st.sidebar:    
+    st.write(data_source)
+    st.write(active_agent)
+st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True)
+
+    
 left_big, right_big = st.columns([0.7, 0.3])
 
 with right_big:
@@ -142,7 +164,7 @@ with right_big:
 with left_big:
     instruction_md = """### Welcome! How this works: \n
 * Connect an Agent to a single Netbox account (by entering a Netbox url and API token; you can use the [public Netbox demo](https://demo.netbox.dev/))\n
-* Train your Agent on the account's local list of **network devices'** **:green[Manufacters]**, **:green[Types]**, and **:green[Sites]** to infer the ***:red[Roles]*** of newly discovered devices instead of manual determinations\n
+* Train your Agent on the account's local list of **network devices'** **:green[Manufacters]**, **:green[Types]**, and **:green[Sites]** to infer the ***:blue[Roles]*** of newly discovered devices instead of manual determinations\n
 * Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application; this demo is presented as a snapshot\n
 * After entering the info below to train an Agent, view its predictions in the sidebar as a *bulk import service* or as a *context-aware auto-complete*"""
     st.markdown(instruction_md)
@@ -182,26 +204,9 @@ with left_big:
 
 # Post training message
 if 'trained' in st.session_state:
-    st.write('***vilet:[Agent Training Complete]***')
+    st.write('***violet:[Agent Training Complete]***')
     st.write("From "+st.session_state.nb_USER_url+" via API token: ..."+st.session_state.nb_USER_api_token[-3:])  
     device_count = st.session_state.train_size + len(st.session_state.test_devices_in)
     st.write("")
     st.write("- {num_devices} devices were used\n- {num_train} for training the Agent\n- {num_test} for testing".format(num_devices=device_count, num_train=st.session_state.train_size, num_test=len(st.session_state.test_devices_in)))
     st.write("View the Agent's performance by clicking the pages in the sidebar.")
-    
-
-chat_support_html = """
-<!--Start of Tawk.to Script-->
-<script type="text/javascript">
-var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
-(function(){
-var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
-s1.async=true;
-s1.src='https://embed.tawk.to/64b28e6394cf5d49dc63bf99/1h5cnoehs';
-s1.charset='UTF-8';
-s1.setAttribute('crossorigin','*');
-s0.parentNode.insertBefore(s1,s0);
-})();
-</script>
-<!--End of Tawk.to Script-->"""
-st.write(chat_support_html, unsafe_allow_html=True)
