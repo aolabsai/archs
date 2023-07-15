@@ -13,12 +13,6 @@ import streamlit as st
 
 left_big, right_big = st.columns([0.7, 0.3])
 
-with right_big:
-    st.image("https://i.imgur.com/n0KciAE.png")
-    # with st.expander("See Agent's Arch (Configuration)"):
-    #     arch_visual_miro_html= """<iframe width="768" height="432" src="https://miro.com/app/live-embed/uXjVM_kESvI=/?moveToViewport=121907,-48157,16256,9923&embedId=323274877415" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>"""
-    #     st.write(arch_visual_miro_html, unsafe_allow_html=True)
-
 with left_big:
 
     # Streamlit-powered frontend
@@ -32,6 +26,7 @@ with left_big:
     st.write("[**Arch visual representaton (Miro)**](https://miro.com/app/board/uXjVM_kESvI=/?share_link_id=346355827918) -- a miro board that visualizes the Agent's Arch.")
     st.write("[**Agent-as-a-Service API reference**](https://docs.aolabs.ai/reference/agentinvoke) -- Agents are primarly designed to be run locally; get in touch if you'd like that.")
     st.write("")
-    st.write("*Running Agents Locally vs via the API:* Agents are designed to be deployed locally; they're super lightweight (the Agents in this app are only 40 neurons/parameters).The API is provided as a quick test bed and we are happy to accomdate local / on-prem needs; please reach out..")
+    st.write("**RE Running Agents Locally instead of the API:** Agents are designed to be deployed locally; they're super lightweight (the Agents in this app are only 40 neurons/parameters).The API is provided as a quick test bed and we are happy to accomdate local / on-prem needs; please reach out..")
     st.write("Visit ([aolabs.ai](https://www.aolabs.ai/)) and ([docs.aolabs.ai](https://docs.aolabs.ai/)) for more and [say hi on discord](https://discord.gg/Zg9bHPYss5).")
- 
+
+st.image("https://i.imgur.com/n0KciAE.png")

@@ -55,7 +55,7 @@ with right_big:
     #     st.write(arch_visual_miro_html, unsafe_allow_html=True)
 
 with left_big:
-    st.write("*Convieved as an autocomplete solution for the [add a new device page on Netbox](https://demo.netbox.dev/dcim/devices/add/)*.")
+    st.write("*Conceived as an autocomplete solution for the [add a new device page on Netbox](https://demo.netbox.dev/dcim/devices/add/)*.")
     st.write("")
     st.write("")
     

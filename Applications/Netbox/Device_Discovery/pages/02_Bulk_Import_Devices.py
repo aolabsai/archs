@@ -71,10 +71,9 @@ with right_big:
 
 with left_big:
 
-    st.write("*Convieved as an API solution for the [bulk import new devices page on Netbox](https://demo.netbox.dev/dcim/devices/import/).*")
+    st.write("*Conceived as an API solution for the [bulk import new devices page on Netbox](https://demo.netbox.dev/dcim/devices/import/).*")
     st.write("")
-    st.write("Click the button below to batch-predict the Roles for these new devices.")
-    st.write("*Running Agents Locally vs via the API:* Agents are designed to be hosted locally; they're super lightweight (the Agents in this app are only 40 neurons/parameters).The API is provided as a quick test bed and we are happy to accomdate local / on-prem needs.")
+    st.write("Click the button below to batch-predict the **:red[Roles]** for these new devices.")
     st.write("")
     
     if 'trained' not in st.session_state: st.text("You have to connect your Netbox account and Agent first.")
@@ -106,7 +105,6 @@ with left_big:
             devices[i, 5] = roles[d.device_role.id]
         
         devices_df = pd.DataFrame( devices, columns=['Name', 'Manufacturer', 'Site', 'Type', 'PREDICTED ROLE', 'EXPECTED ROLE'])
-        
 
 if 'trained' in st.session_state:
     
