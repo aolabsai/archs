@@ -139,12 +139,12 @@ st.write("### *a demo by [aolabs.ai](https://www.aolabs.ai/)*")
 st.write("")
 
 # side bar content
+st.session_state.side_bar_content = """
 if "Agents" not in st.session_state:
     st.session_state["Agents"] = {}
-if st.session_state.account_added is False:
-    data_source = "**Data Source:** :red[*Connect a Netbox Account*]" 
-elif st.session_state.account_added:
-    data_source = "**Data Source:** :green["+st.session_state.nb_USER_url+"]"    
+if 'account_added' in st.session_state:
+    if st.session_state.account_added is False: data_source = "**Data Source:** :red[*Connect a Netbox Account*]" 
+    elif st.session_state.account_added: data_source = "**Data Source:** :green["+st.session_state.nb_USER_url+"]"    
 if 'agent_id' not in st.session_state:
     active_agent = "**Active Agent:** :red[*No Agent Yet*]"
 else:
@@ -152,8 +152,8 @@ else:
 with st.sidebar:    
     st.write(data_source)
     st.write(active_agent)
-st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True)
-
+st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True)"""
+exec(st.session_state.side_bar_content)
     
 left_big, right_big = st.columns([0.7, 0.3])
 
