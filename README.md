@@ -1,10 +1,10 @@
 # Welcome to  AO Labs
 
-We're building the next layer in the AI stack, AI trained by local context, awareness as code. More on our website.
+We're building the next layer in the AI stack, AI trained by local context, awareness as code. [More on our website](https://www.aolabs.ai/).
 
 At these earliest of stages our AI is at a very basic level of self-association, comparable to simplest of animals. It's not ChatGPT or anywhere near human levels, but it has qualities that LLMs and other status quo AI lack.
 
-This *archs repo* contains our first agent configurations and their applications, all open-source. 
+This *archs repo* contains our first agent configurations and their applications, all open-source:
 - [Arch class](https://github.com/aolabsai/archs/blob/main/Arch.py)
 - [Agent Archs](https://github.com/aolabsai/archs/tree/main/Architectures)
 - [Applications](https://github.com/aolabsai/archs/tree/main/Applications)
@@ -21,8 +21,8 @@ Everything in the **archs** repo is open-source: the **Arch** class, particular 
 We plan to open-source the rest of our code progressively over time, that is, the **Agent** class and code that constructs an Agent given an Arch, and this is an evolving discussion as we're careful to ensure we make the right decisions now to realize the long-term potential we've seen with this code. We had started this journey as researchers after all, so there are years of context to be shared.
 
 Our Agents-as-a-Service API is our **Core**'s **Agent** class running on AWS, as a playground to spin up and test Agents without having to install anything, so that you also don't have to worry about hosting multiple unique Agents for your users. However, our Agents are designed to be run directly at the edge.
-- If you are interested in joining us as a Core Contributor, please email Ali or say hi on Slack or our other channels.
-- If you are interested in running Agents locally and need access to Core now, please reach out. joining us as a core contributor contributing to our code code, please say hi on slack 
+- If you are interested in joining us as a Core Contributor, please email Ali or say hi on [Slack](https://join.slack.com/t/aolabsai/shared_invite/zt-1dlu8t1eq-udPzZyK5ADQK76aEeKUvwA) or our other comm channels.
+- If you are interested in running Agents locally and need access to Core now, please reach out, we can accomdate you and we need more use-cases to learn from. 
 
 ###
 More resources:
