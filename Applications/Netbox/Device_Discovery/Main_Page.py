@@ -184,7 +184,7 @@ with left_big:
            
         if 'account_added' in st.session_state:
             if st.session_state.account_added is True:
-                st.write(":violet[Agent Successfully Connected]; there {} devices on this Netbox account available for training/testing.".format(st.session_state.num_devices))
+                st.write(":green[Netbox Account Successfully Connected]; there {} devices on this Netbox account available for training/testing.".format(st.session_state.num_devices))
             
         if 'valid_netbox_apikey' in st.session_state:
             if st.session_state.valid_netbox_apikey is False:
@@ -204,8 +204,8 @@ with left_big:
 
 # Post training message
 if 'trained' in st.session_state:
-    st.write('***violet:[Agent Training Complete]***')
-    st.write("From "+st.session_state.nb_USER_url+" via API token: ..."+st.session_state.nb_USER_api_token[-3:])  
+    st.write('***:violet[Agent Training Complete]***')
+    st.write("From "+st.session_state.nb_USER_url+" via API token: ..."+st.session_state.nb_USER_api_token[-6:])  
     device_count = st.session_state.train_size + len(st.session_state.test_devices_in)
     st.write("")
     st.write("- {num_devices} devices were used\n- {num_train} for training the Agent\n- {num_test} for testing".format(num_devices=device_count, num_train=st.session_state.train_size, num_test=len(st.session_state.test_devices_in)))
