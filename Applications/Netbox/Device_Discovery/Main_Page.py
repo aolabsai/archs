@@ -137,17 +137,14 @@ left_big, right_big = st.columns([0.7, 0.3])
 
 with right_big:
     st.image("https://i.imgur.com/eZyVouO.png")
-    st.markdown("The Netbox Devices' UI at [demo.netbox.dev/dcim/devices/](https://demo.netbox.dev/dcim/devices/)", help="Login with username *admin* and password *admin*.")    
-    # with st.expander("See Agent's Arch (Configuration)"):
-    #     arch_visual_miro_html= """<iframe width="768" height="432" src="https://miro.com/app/live-embed/uXjVM_kESvI=/?moveToViewport=121907,-48157,16256,9923&embedId=323274877415" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>"""
-    #     st.write(arch_visual_miro_html, unsafe_allow_html=True)
+    st.markdown("The Netbox Devices UI at [demo.netbox.dev/dcim/devices/](https://demo.netbox.dev/dcim/devices/)", help="Login with username *admin* and password *admin*.")    
 
 with left_big:
     instruction_md = """### Welcome! How this works: \n
 * Connect an Agent to a single Netbox account (by entering a Netbox url and API token; you can use the [public Netbox demo](https://demo.netbox.dev/))\n
 * Train your Agent on the account's local list of **network devices'** **:green[Manufacters]**, **:green[Types]**, and **:green[Sites]** to infer the ***:red[Roles]*** of newly discovered devices instead of manual determinations\n
 * Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application; this demo is presented as a snapshot\n
-* After entering the info below to train an Agent, view its predictions in the sidebar as a *bulk import service* or as a *context-aware auto-complete*."""
+* After entering the info below to train an Agent, view its predictions in the sidebar as a *bulk import service* or as a *context-aware auto-complete*"""
     st.markdown(instruction_md)
     st.write("---")
     
@@ -165,11 +162,11 @@ with left_big:
            
         if 'account_added' in st.session_state:
             if st.session_state.account_added is True:
-                st.write("Agent connected; there {} devices on this Netbox account available for training/testing.".format(st.session_state.num_devices))
+                st.write(":violet[Agent Successfully Connected]; there {} devices on this Netbox account available for training/testing.".format(st.session_state.num_devices))
             
         if 'valid_netbox_apikey' in st.session_state:
             if st.session_state.valid_netbox_apikey is False:
-                st.write("Imporer Netbox API key-- please try again.")
+                st.write(":red[Invalid Netbox API Key--] *please try again*.")
     
     ## Training and test configuration
     with right:
@@ -185,7 +182,7 @@ with left_big:
 
 # Post training message
 if 'trained' in st.session_state:
-    st.write('***Agent Training Complete***')
+    st.write('***vilet:[Agent Training Complete]***')
     st.write("From "+st.session_state.nb_USER_url+" via API token: ..."+st.session_state.nb_USER_api_token[-3:])  
     device_count = st.session_state.train_size + len(st.session_state.test_devices_in)
     st.write("")
