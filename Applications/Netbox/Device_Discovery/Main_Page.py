@@ -137,19 +137,20 @@ left_big, right_big = st.columns([0.7, 0.3])
 
 with right_big:
     st.image("https://i.imgur.com/eZyVouO.png")
-    st.markdown("Screenshot of the Netbox Devices' UI: [demo.netbox.dev/dcim/devices/](https://demo.netbox.dev/dcim/devices/), username/password admin/admin")    
+    st.markdown("The Netbox Devices' UI at [demo.netbox.dev/dcim/devices/](https://demo.netbox.dev/dcim/devices/)", help="Login with username *admin* and password *admin*.")    
     # with st.expander("See Agent's Arch (Configuration)"):
     #     arch_visual_miro_html= """<iframe width="768" height="432" src="https://miro.com/app/live-embed/uXjVM_kESvI=/?moveToViewport=121907,-48157,16256,9923&embedId=323274877415" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>"""
     #     st.write(arch_visual_miro_html, unsafe_allow_html=True)
 
 with left_big:
     instruction_md = """### Welcome! How this works: \n
-* Connect an Agent to a single Netbox account (enter a netbox url and api token); you can try the [public Netbox demo](https://demo.netbox.dev/)\n
-* The Agent is trained on the account's local list of network devices' **:green[Manufacters]**, **:green[Types]**, and **:green[Sites]**-- to infer the ***:red[Roles]*** of newly discovered devices instead of a manual determination\n
-* Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application; this demo presents them as a snapshot\n
+* Connect an Agent to a single Netbox account (by entering a Netbox url and API token; you can use the [public Netbox demo](https://demo.netbox.dev/))\n
+* Train your Agent on the account's local list of **network devices'** **:green[Manufacters]**, **:green[Types]**, and **:green[Sites]** to infer the ***:red[Roles]*** of newly discovered devices instead of manual determinations\n
+* Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application; this demo is presented as a snapshot\n
 * After entering the info below to train an Agent, view its predictions in the sidebar as a *bulk import service* or as a *context-aware auto-complete*."""
-    st.markdown(instruction_md)    
-
+    st.markdown(instruction_md)
+    st.write("---")
+    
     # Capture USER inputs
     left, right = st.columns(2)
     
@@ -190,3 +191,20 @@ if 'trained' in st.session_state:
     st.write("")
     st.write("- {num_devices} devices were used\n- {num_train} for training the Agent\n- {num_test} for testing".format(num_devices=device_count, num_train=st.session_state.train_size, num_test=len(st.session_state.test_devices_in)))
     st.write("View the Agent's performance by clicking the pages in the sidebar.")
+    
+
+chat_support_html = """
+<!--Start of Tawk.to Script-->
+<script type="text/javascript">
+var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+(function(){
+var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+s1.async=true;
+s1.src='https://embed.tawk.to/64b28e6394cf5d49dc63bf99/1h5cnoehs';
+s1.charset='UTF-8';
+s1.setAttribute('crossorigin','*');
+s0.parentNode.insertBefore(s1,s0);
+})();
+</script>
+<!--End of Tawk.to Script-->"""
+st.write(chat_support_html, unsafe_allow_html=True)
