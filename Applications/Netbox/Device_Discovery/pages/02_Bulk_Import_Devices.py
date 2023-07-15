@@ -66,7 +66,7 @@ left_big, right_big = st.columns([0.7, 0.3])
 
 with right_big:
     st.image("https://i.imgur.com/m2Aws1v.png")
-    st.markdown("Screenshot from demo.netbox.dev")    
+    st.markdown("*Screenshot from demo.netbox.dev/dcim/devices/import/*")    
     # with st.expander("See Agent's Arch (Configuration)"):
     #     arch_visual_miro_html= """<iframe width="768" height="432" src="https://miro.com/app/live-embed/uXjVM_kESvI=/?moveToViewport=121907,-48157,16256,9923&embedId=323274877415" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>"""
     #     st.write(arch_visual_miro_html, unsafe_allow_html=True)
@@ -74,6 +74,7 @@ with right_big:
 with left_big:
 
     st.write("*Conceived as an API solution for the [bulk import new devices page on Netbox](https://demo.netbox.dev/dcim/devices/import/).*")
+    st.write("")
     st.write("")
     st.write("Click the button below to batch-predict the **:red[Roles]** for these new devices.")
     st.write("")

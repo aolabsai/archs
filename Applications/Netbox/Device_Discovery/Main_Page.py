@@ -146,9 +146,9 @@ if 'account_added' in st.session_state:
     if st.session_state.account_added is False: data_source = "**Data Source:** :red[*Connect a Netbox Account*]" 
     elif st.session_state.account_added: data_source = "**Data Source:** :green["+st.session_state.nb_USER_url+"]"    
 if 'agent_id' not in st.session_state:
-    active_agent = "**Active Agent:** :red[*No Agent Yet*]"
+    active_agent = "**Current Agent:** :red[*No Agent(s) Yet*]"
 else:
-    active_agent = "**Active Agent:** :violet["+st.session_state.agent_id+"]"
+    active_agent = "**Current Agent:** :violet["+st.session_state.agent_id+"]"
 with st.sidebar:    
     st.write(data_source)
     st.write(active_agent)
@@ -159,7 +159,7 @@ left_big, right_big = st.columns([0.7, 0.3])
 
 with right_big:
     st.image("https://i.imgur.com/eZyVouO.png")
-    st.markdown("The Netbox Devices UI at [demo.netbox.dev/dcim/devices/](https://demo.netbox.dev/dcim/devices/)", help="Login with username *admin* and password *admin*.")    
+    st.markdown("*The Netbox Devices UI at [demo.netbox.dev/dcim/devices/](https://demo.netbox.dev/dcim/devices/)*", help="Login with username **admin** and password **admin**.")
 
 with left_big:
     instruction_md = """### Welcome! How this works: \n
@@ -176,7 +176,7 @@ with left_big:
     ## Netbox account
     with left:
         st.session_state.nb_USER_url = st.text_input('Enter your Netbox account URL:', "https://demo.netbox.dev/")
-        help_netbox_api = "Get your Netbox API key from {your Netbox url}/user/api-tokens/; for instance from the Netbox public demo by logging in to [demo.netbox.dev](https://demo.netbox.dev/user/api-tokens/) with username *admin* and password *admin*."
+        help_netbox_api = "If you don't have a Netbox account, you can a get temporary API token by logging in to the [Netbox public demo instance](https://demo.netbox.dev/user/api-tokens/) with username *admin* and password *admin*."
         st.session_state.nb_USER_api_token = st.text_input('Enter your Netbox account API token:',  type='password', help=help_netbox_api)
     
         left_filled = len(st.session_state.nb_USER_url) > 0 and len(st.session_state.nb_USER_api_token) > 0

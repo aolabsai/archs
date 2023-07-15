@@ -16,7 +16,7 @@ st.write("*We're an AI research venture out of UC Berkeley building a new class 
 if "side_bar_content" in st.session_state: exec(st.session_state.side_bar_content)
 else:
     with st.sidebar:
-        st.write("*Go to the Main Page to start*")
+        st.write("*Go to the *Main Page* to start*")
 st.write("")
 st.write("")
 
@@ -30,7 +30,7 @@ with left_big:
     st.write("[**Arch visual representaton (Miro)**](https://miro.com/app/board/uXjVM_kESvI=/?share_link_id=346355827918) -- a miro board that visualizes the Agent's Arch.")
     st.write("[**Agent-as-a-Service API reference**](https://docs.aolabs.ai/reference/agentinvoke) -- Agents are primarly designed to be run locally; get in touch if you'd like that.")
     st.write("")
-    st.write("**RE Running Agents Locally instead of the API:** Agents are designed to be deployed locally; they're super lightweight (the Agents in this app are only 40 neurons/parameters).The API is provided as a quick test bed and we are happy to accomdate local / on-prem needs; please reach out..")
+    st.write("**RE Running Agents Locally instead of the API:** Agents are designed to be deployed locally; they're super lightweight (the Agents in this app are only 40 neurons/parameters).The API is provided as a test and playground; we are happy to accommodate local / on-prem deployments; please reach out to set this up.")
     st.write("Visit ([aolabs.ai](https://www.aolabs.ai/)) and ([docs.aolabs.ai](https://docs.aolabs.ai/)) for more and [say hi on discord](https://discord.gg/Zg9bHPYss5).")
     st.write("")
     st.image("https://i.imgur.com/n0KciAE.png")
