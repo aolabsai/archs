@@ -13,28 +13,60 @@ import pynetbox  # Netbox interface
 
 
 # Returns json, result stored in json as Agent's 'story'
-def agent_api_call(agent_id, input_dat, label=None):
-    url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel/agent"
+def agent_api_call(agent_id, input_data, label=None, deployment="API"):
 
-    payload = {
-        "kennel_id": "v0dev/TEST-Netbox_DeviceDiscovery",
-        "agent_id": agent_id,
-        "INPUT": input_dat,
-        "control": {
-            "US": True
+    if deployment == "API":
+        url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel/agent"
+    
+        payload = {
+            "kennel_id": "v0dev/TEST-Netbox_DeviceDiscovery",
+            "agent_id": agent_id,
+            "INPUT": input_data,
+            "control": {
+                "US": True
+            }
         }
-    }
-    if label != None:
-        payload["LABEL"] = label
+        if label != None:
+            payload["LABEL"] = label
+    
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/json",
+            "X-API-KEY": st.secrets['aolabs_api_key']
+        }
+    
+        response = requests.post(url, json=payload, headers=headers)
+        response = response.json()['story']  # we can print the HTTP response here, too
+        return response
 
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "X-API-KEY": st.secrets['aolabs_api_key']
-    }
+    if deployment == "Local":
+        if agent_id not in st.session_state['Local_Agents']:
+            agent = st.session_state.Local_Core( st.session_state.Local_Arch )
+        st.session_state["Local_Agents"][agent_id] = agent
+        agent.reset_state()
+        agent.next_state(input_data, label)
+        response = agent.story[ agent.state-1, agent.arch.Z__flat ]
+        response = "".join(list(response.astype(str)))
+        return response
 
-    response = requests.post(url, json=payload, headers=headers)
-    return response
+if "Local_Agents" not in st.session_state:
+    # to construct and store Local Agents as needed
+    st.session_state.Local_Agents = {}
+
+    # preparing Arch Netbox Device Discovery locally 
+    import Arch 
+    arch = Arch([10, 10, 10], [10], [], "forward_full_conn", "Agent created locally!")
+    st.session_state.Local_Arch = arch
+    
+    # retrieving Agent class locally from Core
+    from github import Github, Auth    
+    github_auth = Auth.Token( st.secrets["aolabs_github_auth"]) ## st.secrets("ao_github_auth") )
+    github_client = Github(auth=github_auth)
+    ao_core = github_client.get_repo("aolabsai/ao_core")
+    content = ao_core.get_contents("ao_core/ao_core.py")
+    exec(content, globals())
+    st.session_state.Local_Core = Agent
+
 
 #save {id: attribute} dicts of device and other info to session_state
 def add_netbox():
@@ -79,7 +111,7 @@ if 'account_added' not in st.session_state:
     
 
 # Trains an Agent on a Netbox instance, first shuffling the list of devices, and for this demo perparing subsets of devices for training and testing
-def train_agents():
+def train_agents(deployment):
     devices = st.session_state.devices
     np.random.shuffle(devices)
     
@@ -97,7 +129,7 @@ def train_agents():
         LABEL = format(d.device_role.id, '010b')
 
         # call Agent via API
-        response = agent_api_call(st.session_state.agent_id_field, INPUT, label=LABEL)
+        response = agent_api_call(st.session_state.agent_id_field, INPUT, label=LABEL, deployment=deployment)
         # print("trained on device {} with status code {}".format(count, response))
         
         prog += 1
@@ -112,6 +144,7 @@ def train_agents():
     st.session_state.mistakes = 0
     
     Agent = {
+        'deployment': deployment,
         'trained': str(st.session_state.trained)+" - "+str(len(train_devices_in)),
         'tested (bulk)': str(st.session_state.tested)+" - "+str(test_size),
         'accuracy (bulk)': "",
@@ -149,9 +182,11 @@ if 'agent_id' not in st.session_state:
     active_agent = "**Current Agent:** :red[*No Agent(s) Yet*]"
 else:
     active_agent = "**Current Agent:** :violet["+st.session_state.agent_id+"]"
+    agent_deployment = "Agent deployed :blue["+st.session_state.Agents[st.session_state.agent_id]['deployment']+"]"
 with st.sidebar:    
     st.write(data_source)
     st.write(active_agent)
+    st.write(agent_deployment)
 st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True)"""
 exec(st.session_state.side_bar_content)
     
@@ -200,7 +235,8 @@ with left_big:
         st.session_state.agent_id_field = st.text_input("Enter a unique name for this Agent", disabled=not(st.session_state.account_added))
     
         right_filled = len(st.session_state.agent_id_field) > 0
-        st.button("Train Your Agent", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices))
+        st.button("Train Your Agent [[:blue[API Hosted]]", type="primary", on_click=train_agents("API"), disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices))
+        st.button("Train Your Agent [[:violet[Locally]]",type="primary", on_click=train_agents("Local"), disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices))
 
 # Post training message
 if 'trained' in st.session_state:

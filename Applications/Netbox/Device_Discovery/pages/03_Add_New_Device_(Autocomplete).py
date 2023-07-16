@@ -17,13 +17,12 @@ from Main_Page import agent_api_call
 def Recommendation_Callback():            
     # Run Agent API
     INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
-    response = agent_api_call(st.session_state.agent_id, INPUT)
-    result = int(response.json()['story'], 2)    
-    print("RECOMMENDED - " + str(result))
+    response = agent_api_call(st.session_state.agent_id, INPUT, deployment=st.session_state.Agents[ st.session_state.agent_id ]['deployment'])
+    print("RECOMMENDED - " + response)
 
     st.session_state.recs += 1
     try:
-        st.session_state.recommendation = roles[result]
+        st.session_state.recommendation = roles[response]
         st.write("**Predicted** *Device Role*:  "+ st.session_state.recommendation)
     except KeyError:
         st.session_state.mistakes += 1
@@ -34,9 +33,8 @@ def Confirm_Recommendation_Callback():
     # Run Agent API
     INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
     LABEL = format(role_id, '010b')
-    response = agent_api_call(st.session_state.agent_id, INPUT, label=LABEL)
-    result = response.json()['story']
-    print("CONFIRMED - " + result)
+    response = agent_api_call(st.session_state.agent_id, INPUT, label=LABEL, deployment=st.session_state.Agents[ st.session_state.agent_id ]['deployment'])
+    print("CONFIRMED - " + response)
     st.session_state.print_confirm = True
 
 
@@ -64,6 +62,7 @@ with left_big:
     if 'trained' not in st.session_state:
         st.text("You have to connect your Netbox account and an Agent first.")
     else:    
+        deployment = st.session_state.Agents[ st.session_state.agent_id ]['deployment']
         # generate table of devices to be added / recommended    
         if st.session_state.account_added is True:
             test_devices = st.session_state.test_devices_in

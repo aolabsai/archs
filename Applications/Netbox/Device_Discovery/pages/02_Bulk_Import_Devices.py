@@ -28,14 +28,13 @@ def Batch_New_Devices_Callback():
         
         # Run Agent API
         INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
-        response = agent_api_call(st.session_state.agent_id, INPUT)
+        response = agent_api_call(st.session_state.agent_id, INPUT, deployment=st.session_state.Agents[ st.session_state.agent_id ]['deployment'])
         print(response)
         
         # Calculate results
-        story = response.json()['story']
-        st.session_state.predicted_roles += [int(story, 2)]
+        st.session_state.predicted_roles += [int(response, 2)]
         expected = d.device_role.id
-        if expected == int(story, 2):
+        if expected == int(response, 2):
             correct_count += 1
         elif st.session_state.predicted_roles[i] not in roles:
             missing_count += 1
