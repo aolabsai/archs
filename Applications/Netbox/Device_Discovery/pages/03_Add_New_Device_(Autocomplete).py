@@ -19,15 +19,15 @@ def Recommendation_Callback():
     INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
     label = None
     response = agent_api_call(st.session_state.agent_id, INPUT, label, deployment=st.session_state.Agents[ st.session_state.agent_id ]['deployment'])
-    # print("RECOMMENDED - " + response)
-
+    
     x = int(st.session_state.Agents[ st.session_state.agent_id ]['recs (autocomplete)']) 
+    y = int(st.session_state.Agents[ st.session_state.agent_id ]['mistakes (autocomplete)'])
     x += 1
     try:
-        st.session_state.recommendation = roles[response]
+        st.session_state.recommendation = roles[ int(response, 2) ]
         st.write("**Predicted** *Device Role*:  "+ st.session_state.recommendation)
-    except KeyError:
-        y = int(st.session_state.Agents[ st.session_state.agent_id ]['mistakes (autocomplete)'])
+    except KeyError as e:
+        print("Key Error", e)        
         y += 1
         st.write("Oops, no recommendation to offer; this happened "+str(y)+" out of "+str(x)+" recs so far") 
     st.session_state.Agents[ st.session_state.agent_id ]['recs (autocomplete)'] = str(x)
@@ -38,8 +38,10 @@ def Confirm_Recommendation_Callback():
     # Run Agent API
     INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
     LABEL = format(role_id, '010b')
-    response = agent_api_call(st.session_state.agent_id, INPUT, label=LABEL, deployment=st.session_state.Agents[ st.session_state.agent_id ]['deployment'])
-    # print("CONFIRMED - " + response)
+    print("INPUT " + INPUT)
+    print("LABEL " + LABEL)
+    response = agent_api_call( st.session_state.agent_id, INPUT, label=LABEL, deployment=st.session_state.Agents[st.session_state.agent_id]['deployment'] )
+    print("CONFIRMED - " + response)
     st.session_state.print_confirm = True
 
 
@@ -111,5 +113,6 @@ with left_big:
         st.write("")
         st.button("Confirm Device & Add to Agent's Training", on_click= Confirm_Recommendation_Callback)
         if 'print_confirm' in st.session_state:
-            if st.session_state.print_confirm is True: st.write(":blue[Device added] & :violent[Agent has been trained]")
+            if st.session_state.print_confirm is True:
+                st.write(":blue[Device added] & :violent[Agent has been trained]")
         st.session_state.print_confirm = False

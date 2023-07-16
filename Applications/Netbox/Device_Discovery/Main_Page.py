@@ -13,8 +13,8 @@ import pynetbox  # Netbox interface
 
 
 # Returns json, result stored in json as Agent's 'story'
-def agent_api_call(agent_id, input_data, label=None, deployment="API"):
-
+def agent_api_call(agent_id, input_data, label=None, deployment="Local"):
+    print(deployment)
     if deployment == "API":
         url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel/agent"
     
@@ -32,24 +32,27 @@ def agent_api_call(agent_id, input_data, label=None, deployment="API"):
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
-            "X-API-KEY": st.secrets['aolabs_api_key']
+            "X-API-KEY": "DG4FaTp4ew9ZW1aC7ueDbavHnXQgOIiXanFaJLhC" #st.secrets['aolabs_api_key']
         }
     
         response = requests.post(url, json=payload, headers=headers)
         response = response.json()['story']  # we can print the HTTP response here, too
+        print(response)
         return response
 
     if deployment == "Local":
-        if label is None: label = []
+        if label == None:
+            label = []
         if agent_id not in st.session_state['Local_Agents']:
             agent = st.session_state.Local_Core( st.session_state.Local_Arch )
+            st.session_state["Local_Agents"][agent_id] = agent
         else:
             agent = st.session_state['Local_Agents'][agent_id]
-        st.session_state["Local_Agents"][agent_id] = agent
         agent.reset_state()
-        agent.next_state( list(input_data), label)
+        agent.next_state( list(input_data), list(label), unsequenced=True)
         response = agent.story[ agent.state-1, agent.arch.Z__flat ]
         response = "".join(list(response.astype(str)))
+        print("from api call func" + response)
         return response
 
 if "Local_Agents" not in st.session_state:
@@ -63,7 +66,7 @@ if "Local_Agents" not in st.session_state:
     
     # retrieving Agent class locally from Core
     from github import Github, Auth    
-    github_auth = Auth.Token( st.secrets["aolabs_github_auth"]) ## st.secrets("ao_github_auth") )
+    github_auth = Auth.Token( "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" ) # st.secrets["aolabs_github_auth"])
     github_client = Github(auth=github_auth)
     ao_core = github_client.get_repo("aolabsai/ao_core")
     content = ao_core.get_contents("ao_core/ao_core.py")
