@@ -20,14 +20,18 @@ def Recommendation_Callback():
     response = agent_api_call(st.session_state.agent_id, INPUT, deployment=st.session_state.Agents[ st.session_state.agent_id ]['deployment'])
     # print("RECOMMENDED - " + response)
 
-    st.session_state.Agents[ st.session_state.agent_id ]['recs (autocomplete)'] += 1
+    x = int(st.session_state.Agents[ st.session_state.agent_id ]['recs (autocomplete)']) 
+    x += 1
     # st.session_state.recs += 1
     try:
         st.session_state.recommendation = roles[response]
         st.write("**Predicted** *Device Role*:  "+ st.session_state.recommendation)
     except KeyError:
-        st.session_state.Agents[ st.session_state.agent_id ]['mistakes (autocomplete)'] += 1
-        st.write("Oops, no recommendation to offer; this happened "+str(st.session_state.Agents[st.session_state.agent_id ]['mistakes (autocomplete)'])+" out of "+str( st.session_state.Agents[ st.session_state.agent_id ]['recs (autocomplete)'])+" recs so far") 
+        y = int(st.session_state.Agents[ st.session_state.agent_id ]['mistakes (autocomplete)'])
+        y += 1
+        st.write("Oops, no recommendation to offer; this happened "+str(y)+" out of "+str(x)+" recs so far") 
+    st.session_state.Agents[ st.session_state.agent_id ]['recs (autocomplete)'] = str(x)
+    st.session_state.Agents[ st.session_state.agent_id ]['mistakes (autocomplete)'] = str(y)
 
 
 def Confirm_Recommendation_Callback():               
