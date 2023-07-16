@@ -113,7 +113,7 @@ if 'account_added' not in st.session_state:
 # Trains an Agent on a Netbox instance, first shuffling the list of devices, and for this demo perparing subsets of devices for training and testing
 def train_agents(deployment):
     if "devices" not in st.session_state:
-        pass
+        return
     else:
         devices = st.session_state.devices
         np.random.shuffle(devices)
