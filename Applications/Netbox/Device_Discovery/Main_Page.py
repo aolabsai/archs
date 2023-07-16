@@ -40,11 +40,12 @@ def agent_api_call(agent_id, input_data, label=None, deployment="API"):
         return response
 
     if deployment == "Local":
+        if label is None: label = []
         if agent_id not in st.session_state['Local_Agents']:
             agent = st.session_state.Local_Core( st.session_state.Local_Arch )
         st.session_state["Local_Agents"][agent_id] = agent
         agent.reset_state()
-        agent.next_state(input_data, label)
+        agent.next_state( list(input_data), label)
         response = agent.story[ agent.state-1, agent.arch.Z__flat ]
         response = "".join(list(response.astype(str)))
         return response

@@ -106,5 +106,5 @@ with left_big:
         st.write("")
         st.button("Confirm Device & Add to Agent's Training", on_click= Confirm_Recommendation_Callback)
         if 'print_confirm' in st.session_state:
-            if st.session_state.print_confirm is True: st.write(":blue[Device added] & :violent[Agent has been trained].")
+            if st.session_state.print_confirm is True: st.write(":blue[Device added] & :violent[Agent has been trained]")
         st.session_state.print_confirm = False
