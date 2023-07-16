@@ -14,10 +14,9 @@ import pynetbox  # Netbox interface
 
 # Returns json, result stored in json as Agent's 'story'
 def agent_api_call(agent_id, input_data, label=None, deployment="Local"):
-    print(deployment)
+
     if deployment == "API":
         url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel/agent"
-    
         payload = {
             "kennel_id": "v0dev/TEST-Netbox_DeviceDiscovery",
             "agent_id": agent_id,
@@ -28,16 +27,13 @@ def agent_api_call(agent_id, input_data, label=None, deployment="Local"):
         }
         if label != None:
             payload["LABEL"] = label
-    
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
             "X-API-KEY": st.secrets['aolabs_api_key']
         }
-    
         response = requests.post(url, json=payload, headers=headers)
         response = response.json()['story']  # we can print the HTTP response here, too
-        print(response)
         return response
 
     if deployment == "Local":
@@ -52,11 +48,10 @@ def agent_api_call(agent_id, input_data, label=None, deployment="Local"):
         agent.next_state( list(input_data), list(label), unsequenced=True)
         response = agent.story[ agent.state-1, agent.arch.Z__flat ]
         response = "".join(list(response.astype(str)))
-        print("from api call func" + response)
         return response
 
+# to construct and store Local Agents as needed
 if "Local_Agents" not in st.session_state:
-    # to construct and store Local Agents as needed
     st.session_state.Local_Agents = {}
 
     # preparing Arch Netbox Device Discovery locally 
@@ -72,7 +67,6 @@ if "Local_Agents" not in st.session_state:
     content = ao_core.get_contents("ao_core/ao_core.py")
     exec(content.decoded_content, globals())
     st.session_state.Local_Core = Agent
-
 
 #save {id: attribute} dicts of device and other info to session_state
 def add_netbox():
@@ -205,9 +199,9 @@ with right_big:
 
 with left_big:
     instruction_md = """### Welcome! How this works: \n
-* Connect an Agent to a single Netbox account (by entering a Netbox url and API token; you can use the [public Netbox demo](https://demo.netbox.dev/))\n
-* Train your Agent on the account's local list of **network devices'** **:green[Manufacters]**, **:green[Types]**, and **:green[Sites]** to infer the ***:blue[Roles]*** of newly discovered devices instead of manual determinations\n
-* Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application; this demo is presented as a snapshot\n
+* Connect an unique Agent to a Netbox account (by entering a Netbox url and API token; you can use the [public Netbox demo](https://demo.netbox.dev/))\n
+* Train your Agent on the account's local list of **Network Devices'** **:green[Manufacters]**, **:green[Types]**, and **:green[Sites]** to infer the ***:blue[Roles]*** of newly discovered devices and supplement manual role assignment\n
+* Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application; this demo presented a snapshot\n
 * After entering the info below to train an Agent, view its predictions in the sidebar as a *bulk import service* or as a *context-aware auto-complete*"""
     st.markdown(instruction_md)
     st.write("---")
@@ -242,8 +236,9 @@ with left_big:
         st.session_state.agent_id_field = st.text_input("Enter a unique name for this Agent", disabled=not(st.session_state.account_added))
     
         right_filled = len(st.session_state.agent_id_field) > 0
-        st.button("Deploy & Train Your Agent [:blue[via our API]]", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), args = ("API",))
-        st.button("Deploy & Train Your Agent [:violet[Locally]]",type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), args= ("Local",), help="The Agent will be running in the Streamlit session (almost eqv to running on the browser; Agents are lightweight enough)")
+        st.button("Deploy & Train Your Agent [:violet[locally]]",type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), args= ("Local",), help="The Agent will be running in the Streamlit browser session; Agents are by design lightweight enough to run on the edge")
+        st.button("Deploy & Train Your Agent [:blue[via our API]]", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), args = ("API",), help="We'll host your Agent on our AWS via our API, so you can even invoke this Agent from anywhere else https://docs.aolabs.ai/reference/agentinvoke")
+
 
 # Post training message
 if 'trained' in st.session_state:
