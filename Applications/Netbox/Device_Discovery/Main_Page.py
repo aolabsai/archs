@@ -236,8 +236,8 @@ with left_big:
         st.session_state.agent_id_field = st.text_input("Enter a unique name for this Agent", disabled=not(st.session_state.account_added))
     
         right_filled = len(st.session_state.agent_id_field) > 0
-        st.button("Deploy & Train Your Agent [:blue[via our API]]", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), arg = ("API",))
-        st.button("Deploy & Train Your Agent [:violet[Locally]]",type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), arg= ("Local",), help="The Agent will be running in the Streamlit session (almost eqv to running on the browser; Agents are lightweight enough)")
+        st.button("Deploy & Train Your Agent [:blue[via our API]]", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), args = ("API",))
+        st.button("Deploy & Train Your Agent [:violet[Locally]]",type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), args= ("Local",), help="The Agent will be running in the Streamlit session (almost eqv to running on the browser; Agents are lightweight enough)")
 
 # Post training message
 if 'trained' in st.session_state:
