@@ -64,7 +64,7 @@ if "Local_Agents" not in st.session_state:
     github_client = Github(auth=github_auth)
     ao_core = github_client.get_repo("aolabsai/ao_core")
     content = ao_core.get_contents("ao_core/ao_core.py")
-    exec(content, globals())
+    exec(content.decoded_content, globals())
     st.session_state.Local_Core = Agent
 
 
