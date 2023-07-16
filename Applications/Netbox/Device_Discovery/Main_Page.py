@@ -112,50 +112,47 @@ if 'account_added' not in st.session_state:
 
 # Trains an Agent on a Netbox instance, first shuffling the list of devices, and for this demo perparing subsets of devices for training and testing
 def train_agents(deployment):
-    if "devices" not in st.session_state:
-        return
-    else:
-        devices = st.session_state.devices
-        np.random.shuffle(devices)
-        
-        test_size = st.session_state.USER_num_test_devices
-        batch = devices[0:st.session_state.USER_num_total_devices]
-        test_devices_in = batch[0:test_size]
-        train_devices_in = batch[test_size:]
-        st.session_state.test_devices_in = test_devices_in
-        st.session_state.train_size = len(train_devices_in)
-        
-        prog = 0
-        prog_bar = st.progress(0, text="Training Progress")
-        for d in train_devices_in:
-            INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
-            LABEL = format(d.device_role.id, '010b')
+    devices = st.session_state.devices
+    np.random.shuffle(devices)
     
-            # call Agent via API
-            response = agent_api_call(st.session_state.agent_id_field, INPUT, label=LABEL, deployment=deployment)
-            # print("trained on device {} with status code {}".format(count, response))
-            
-            prog += 1
-            prog_bar.progress(float(prog)/len(train_devices_in), text='Training Progress')
-        # display training is DONE message
-        prog_bar.progress(1.0, text='Training Complete')
+    test_size = st.session_state.USER_num_test_devices
+    batch = devices[0:st.session_state.USER_num_total_devices]
+    test_devices_in = batch[0:test_size]
+    train_devices_in = batch[test_size:]
+    st.session_state.test_devices_in = test_devices_in
+    st.session_state.train_size = len(train_devices_in)
     
-        st.session_state.agent_id = st.session_state.agent_id_field
-        st.session_state.trained = True
-        st.session_state.tested = False
-        st.session_state.recs = 0
-        st.session_state.mistakes = 0
+    prog = 0
+    prog_bar = st.progress(0, text="Training Progress")
+    for d in train_devices_in:
+        INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
+        LABEL = format(d.device_role.id, '010b')
+
+        # call Agent via API
+        response = agent_api_call(st.session_state.agent_id_field, INPUT, label=LABEL, deployment=deployment)
+        # print("trained on device {} with status code {}".format(count, response))
         
-        Agent = {
-            'deployment': deployment,
-            'trained': str(st.session_state.trained)+" - "+str(len(train_devices_in)),
-            'tested (bulk)': str(st.session_state.tested)+" - "+str(test_size),
-            'accuracy (bulk)': "",
-            'no guesses (bulk)': "",
-            'recs (autocomplete)': str(st.session_state.recs),
-            'mistakes (autocomplete)': str(st.session_state.mistakes),
-            }
-        st.session_state.Agents[ st.session_state.agent_id ] = Agent
+        prog += 1
+        prog_bar.progress(float(prog)/len(train_devices_in), text='Training Progress')
+    # display training is DONE message
+    prog_bar.progress(1.0, text='Training Complete')
+
+    st.session_state.agent_id = st.session_state.agent_id_field
+    st.session_state.trained = True
+    st.session_state.tested = False
+    st.session_state.recs = 0
+    st.session_state.mistakes = 0
+    
+    Agent = {
+        'deployment': deployment,
+        'trained': str(st.session_state.trained)+" - "+str(len(train_devices_in)),
+        'tested (bulk)': str(st.session_state.tested)+" - "+str(test_size),
+        'accuracy (bulk)': "",
+        'no guesses (bulk)': "",
+        'recs (autocomplete)': str(st.session_state.recs),
+        'mistakes (autocomplete)': str(st.session_state.mistakes),
+        }
+    st.session_state.Agents[ st.session_state.agent_id ] = Agent
 
 
 # Streamlit-powered frontend
@@ -239,8 +236,8 @@ with left_big:
         st.session_state.agent_id_field = st.text_input("Enter a unique name for this Agent", disabled=not(st.session_state.account_added))
     
         right_filled = len(st.session_state.agent_id_field) > 0
-        st.button("Train Your Agent [[:blue[API Hosted]]", type="primary", on_click=train_agents("API"), disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices))
-        st.button("Train Your Agent [[:violet[Locally]]",type="primary", on_click=train_agents("Local"), disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices))
+        st.button("Deploy & Train Your Agent [:blue[via our API]]", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), arg = ("API",))
+        st.button("Deploy & Train Your Agent [:violet[Locally]]",type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), arg= ("Local",), help="The Agent will be running in the Streamlit session (almost eqv to running on the browser; Agents are lightweight enough)")
 
 # Post training message
 if 'trained' in st.session_state:
