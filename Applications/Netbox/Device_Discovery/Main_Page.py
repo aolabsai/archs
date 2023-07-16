@@ -54,7 +54,7 @@ if "Local_Agents" not in st.session_state:
     st.session_state.Local_Agents = {}
 
     # preparing Arch Netbox Device Discovery locally 
-    import Arch 
+    from Arch import Arch
     arch = Arch([10, 10, 10], [10], [], "forward_full_conn", "Agent created locally!")
     st.session_state.Local_Arch = arch
     
@@ -180,6 +180,7 @@ if 'account_added' in st.session_state:
     elif st.session_state.account_added: data_source = "**Data Source:** :green["+st.session_state.nb_USER_url+"]"    
 if 'agent_id' not in st.session_state:
     active_agent = "**Current Agent:** :red[*No Agent(s) Yet*]"
+    agent_deployment = ""
 else:
     active_agent = "**Current Agent:** :violet["+st.session_state.agent_id+"]"
     agent_deployment = "Agent deployed :blue["+st.session_state.Agents[st.session_state.agent_id]['deployment']+"]"
