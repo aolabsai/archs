@@ -26,7 +26,7 @@ def Batch_New_Devices_Callback():
     for i in range(len(test_devices)):
         d = test_devices[i]
         
-        # Run Agent API
+        # Run Agent API or Local
         INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
         response = agent_api_call(st.session_state.agent_id, INPUT, deployment=st.session_state.Agents[ st.session_state.agent_id ]['deployment'])
         print(response)

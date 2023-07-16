@@ -23,7 +23,6 @@ def Recommendation_Callback():
 
     x = int(st.session_state.Agents[ st.session_state.agent_id ]['recs (autocomplete)']) 
     x += 1
-    # st.session_state.recs += 1
     try:
         st.session_state.recommendation = roles[response]
         st.write("**Predicted** *Device Role*:  "+ st.session_state.recommendation)
