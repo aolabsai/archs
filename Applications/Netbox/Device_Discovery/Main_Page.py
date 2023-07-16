@@ -112,47 +112,50 @@ if 'account_added' not in st.session_state:
 
 # Trains an Agent on a Netbox instance, first shuffling the list of devices, and for this demo perparing subsets of devices for training and testing
 def train_agents(deployment):
-    devices = st.session_state.devices
-    np.random.shuffle(devices)
-    
-    test_size = st.session_state.USER_num_test_devices
-    batch = devices[0:st.session_state.USER_num_total_devices]
-    test_devices_in = batch[0:test_size]
-    train_devices_in = batch[test_size:]
-    st.session_state.test_devices_in = test_devices_in
-    st.session_state.train_size = len(train_devices_in)
-    
-    prog = 0
-    prog_bar = st.progress(0, text="Training Progress")
-    for d in train_devices_in:
-        INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
-        LABEL = format(d.device_role.id, '010b')
-
-        # call Agent via API
-        response = agent_api_call(st.session_state.agent_id_field, INPUT, label=LABEL, deployment=deployment)
-        # print("trained on device {} with status code {}".format(count, response))
+    if "devices" not in st.session_state:
+        pass
+    else:
+        devices = st.session_state.devices
+        np.random.shuffle(devices)
         
-        prog += 1
-        prog_bar.progress(float(prog)/len(train_devices_in), text='Training Progress')
-    # display training is DONE message
-    prog_bar.progress(1.0, text='Training Complete')
-
-    st.session_state.agent_id = st.session_state.agent_id_field
-    st.session_state.trained = True
-    st.session_state.tested = False
-    st.session_state.recs = 0
-    st.session_state.mistakes = 0
+        test_size = st.session_state.USER_num_test_devices
+        batch = devices[0:st.session_state.USER_num_total_devices]
+        test_devices_in = batch[0:test_size]
+        train_devices_in = batch[test_size:]
+        st.session_state.test_devices_in = test_devices_in
+        st.session_state.train_size = len(train_devices_in)
+        
+        prog = 0
+        prog_bar = st.progress(0, text="Training Progress")
+        for d in train_devices_in:
+            INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
+            LABEL = format(d.device_role.id, '010b')
     
-    Agent = {
-        'deployment': deployment,
-        'trained': str(st.session_state.trained)+" - "+str(len(train_devices_in)),
-        'tested (bulk)': str(st.session_state.tested)+" - "+str(test_size),
-        'accuracy (bulk)': "",
-        'no guesses (bulk)': "",
-        'recs (autocomplete)': str(st.session_state.recs),
-        'mistakes (autocomplete)': str(st.session_state.mistakes),
-        }
-    st.session_state.Agents[ st.session_state.agent_id ] = Agent
+            # call Agent via API
+            response = agent_api_call(st.session_state.agent_id_field, INPUT, label=LABEL, deployment=deployment)
+            # print("trained on device {} with status code {}".format(count, response))
+            
+            prog += 1
+            prog_bar.progress(float(prog)/len(train_devices_in), text='Training Progress')
+        # display training is DONE message
+        prog_bar.progress(1.0, text='Training Complete')
+    
+        st.session_state.agent_id = st.session_state.agent_id_field
+        st.session_state.trained = True
+        st.session_state.tested = False
+        st.session_state.recs = 0
+        st.session_state.mistakes = 0
+        
+        Agent = {
+            'deployment': deployment,
+            'trained': str(st.session_state.trained)+" - "+str(len(train_devices_in)),
+            'tested (bulk)': str(st.session_state.tested)+" - "+str(test_size),
+            'accuracy (bulk)': "",
+            'no guesses (bulk)': "",
+            'recs (autocomplete)': str(st.session_state.recs),
+            'mistakes (autocomplete)': str(st.session_state.mistakes),
+            }
+        st.session_state.Agents[ st.session_state.agent_id ] = Agent
 
 
 # Streamlit-powered frontend
