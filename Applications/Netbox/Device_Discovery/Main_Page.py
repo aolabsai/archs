@@ -150,8 +150,8 @@ def train_agents(deployment):
         'tested (bulk)': str(st.session_state.tested)+" - "+str(test_size),
         'accuracy (bulk)': "",
         'no guesses (bulk)': "",
-        'recs (autocomplete)': str(st.session_state.recs),
-        'mistakes (autocomplete)': str(st.session_state.mistakes),
+        'recs (autocomplete)': str(0),
+        'mistakes (autocomplete)': str(0),
         }
     st.session_state.Agents[ st.session_state.agent_id ] = Agent
 

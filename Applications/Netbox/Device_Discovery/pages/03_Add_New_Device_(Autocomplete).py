@@ -17,7 +17,8 @@ from Main_Page import agent_api_call
 def Recommendation_Callback():            
     # Run Agent API
     INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
-    response = agent_api_call(st.session_state.agent_id, INPUT, deployment=st.session_state.Agents[ st.session_state.agent_id ]['deployment'])
+    label = None
+    response = agent_api_call(st.session_state.agent_id, INPUT, label, deployment=st.session_state.Agents[ st.session_state.agent_id ]['deployment'])
     # print("RECOMMENDED - " + response)
 
     x = int(st.session_state.Agents[ st.session_state.agent_id ]['recs (autocomplete)']) 
