@@ -32,7 +32,7 @@ def agent_api_call(agent_id, input_data, label=None, deployment="Local"):
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
-            "X-API-KEY": "DG4FaTp4ew9ZW1aC7ueDbavHnXQgOIiXanFaJLhC" #st.secrets['aolabs_api_key']
+            "X-API-KEY": st.secrets['aolabs_api_key']
         }
     
         response = requests.post(url, json=payload, headers=headers)
@@ -66,7 +66,7 @@ if "Local_Agents" not in st.session_state:
     
     # retrieving Agent class locally from Core
     from github import Github, Auth    
-    github_auth = Auth.Token( "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" ) # st.secrets["aolabs_github_auth"])
+    github_auth = Auth.Token(st.secrets["aolabs_github_auth"])
     github_client = Github(auth=github_auth)
     ao_core = github_client.get_repo("aolabsai/ao_core")
     content = ao_core.get_contents("ao_core/ao_core.py")
