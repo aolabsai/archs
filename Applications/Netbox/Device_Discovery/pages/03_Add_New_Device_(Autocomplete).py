@@ -18,15 +18,16 @@ def Recommendation_Callback():
     # Run Agent API
     INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
     response = agent_api_call(st.session_state.agent_id, INPUT, deployment=st.session_state.Agents[ st.session_state.agent_id ]['deployment'])
-    print("RECOMMENDED - " + response)
+    # print("RECOMMENDED - " + response)
 
-    st.session_state.recs += 1
+    st.session_state.Agents[ st.session_state.agent_id ]['recs (autocomplete)'] += 1
+    # st.session_state.recs += 1
     try:
         st.session_state.recommendation = roles[response]
         st.write("**Predicted** *Device Role*:  "+ st.session_state.recommendation)
     except KeyError:
-        st.session_state.mistakes += 1
-        st.write("Oops, no recommendation to offer; this happened "+str( st.session_state.mistakes)+" out of "+str( st.session_state.recs)+" recs so far") 
+        st.session_state.Agents[ st.session_state.agent_id ]['mistakes (autocomplete)'] += 1
+        st.write("Oops, no recommendation to offer; this happened "+str(st.session_state.Agents[st.session_state.agent_id ]['mistakes (autocomplete)'])+" out of "+str( st.session_state.Agents[ st.session_state.agent_id ]['recs (autocomplete)'])+" recs so far") 
 
 
 def Confirm_Recommendation_Callback():               
@@ -34,7 +35,7 @@ def Confirm_Recommendation_Callback():
     INPUT = format(manufacturer_id, '010b') + format(type_id, '010b') + format(site_id, '010b')
     LABEL = format(role_id, '010b')
     response = agent_api_call(st.session_state.agent_id, INPUT, label=LABEL, deployment=st.session_state.Agents[ st.session_state.agent_id ]['deployment'])
-    print("CONFIRMED - " + response)
+    # print("CONFIRMED - " + response)
     st.session_state.print_confirm = True
 
 
