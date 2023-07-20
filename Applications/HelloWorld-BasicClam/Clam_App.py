@@ -10,38 +10,72 @@ import numpy as np
 import streamlit as st
 import requests
 
-from PIL import Image
-from urllib.request import urlopen
 
-def agent_api_call(agent_id, input_dat, api_key, label=None):
-    url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel/agent"
+# Returns json, result stored in json as Agent's 'story'
+def agent_api_call(agent_id, input_dat, label=None, deployment="Local"):
 
-    payload = {
-        "kennel_id": "v0dev/TEST-BedOfClams",
-        "agent_id": agent_id,
-        "INPUT": input_dat,
-        "control": {
-            "US": True
+    if deployment == "API":
+        url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel/agent"
+    
+        payload = {
+            "kennel_id": "v0dev/TEST-BedOfClams",
+            "agent_id": agent_id,
+            "INPUT": input_dat,
+            "control": {
+                "US": True
+            }
         }
-    }
-    if label != None:
-        payload["LABEL"] = label
+        if label != None:
+            payload["LABEL"] = label
+    
+        headers = {
+            "accept": "application/json",
+            "content-type": "application/json",
+            "X-API-KEY": st.secrets["aolabs_api_key"]
+        }
+    
+        response = requests.post(url, json=payload, headers=headers)
+        print(response)    
+        response = response.json()['story']  # we can print the HTTP response here, too
+        return response
 
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "X-API-KEY": api_key
-    }
+    if deployment == "Local":
+        if label == None:
+            label = []
+        if agent_id not in st.session_state['Local_Agents']:
+            agent = st.session_state.Local_Core( st.session_state.Local_Arch )
+            st.session_state["Local_Agents"][agent_id] = agent
+        else:
+            agent = st.session_state['Local_Agents'][agent_id]
+        agent.reset_state()
+        agent.next_state( list(input_data), list(label), unsequenced=True)
+        response = agent.story[ agent.state-1, agent.arch.Z__flat ]
+        response = "".join(list(response.astype(str)))
+        print("from api call func" + response)
+        return response
 
-    response = requests.post(url, json=payload, headers=headers)
-    return response
+if "Local_Agents" not in st.session_state:
+    # to construct and store Local Agents as needed
+    st.session_state.Local_Agents = {}
 
-url2 = "https://i.imgur.com/j3jalQE.png"
-favicon = Image.open(urlopen(url2))
+    # preparing Arch Netbox Device Discovery locally 
+    from Arch import Arch
+    arch = Arch([1, 1, 1], [1], [], "full_conn", "Clam Agent created locally!")
+    st.session_state.Local_Arch = arch
+    
+    # retrieving Agent class locally from Core
+    from github import Github, Auth    
+    github_auth = Auth.Token(st.secrets["aolabs_github_auth"])
+    github_client = Github(auth=github_auth)
+    ao_core = github_client.get_repo("aolabsai/ao_core")
+    content = ao_core.get_contents("ao_core/ao_core.py")
+    exec(content.decoded_content, globals())
+    st.session_state.Local_Core = Agent
+
 
 st.set_page_config(
     page_title="AO Labs Demo App",
-    page_icon=favicon,
+    page_icon="https://i.imgur.com/j3jalQE.png",
     layout="wide",
     initial_sidebar_state="expanded",
     menu_items={
@@ -51,15 +85,9 @@ st.set_page_config(
     }
 )
 
-#using preset api key for now
-api_key = 'buildBottomUpRealAGI'
-st.session_state.api_key = api_key  
-
 # App Front End
 st.title('AO Labs v0.1.0 Clam Demo')
-url = "https://i.imgur.com/cTHLQYL.png"
-img = Image.open(urlopen(url))
-st.image(img)
+st.image("https://i.imgur.com/cTHLQYL.png")
 st.markdown("*Note: This app is not yet a standalone experience; please visit [this guide for more context](https://docs.google.com/document/d/1cUmTXsf7bCIMGKm3RHn001Qya-tZcFTvgCPj4Ynu2_M/edit).*")
 st.write("")
 st.write("")
@@ -67,11 +95,24 @@ st.write("")
 
 st.write("First, name your Clam Agent.")
 st.write(" Agents maintain persistant state and are auto-provisioned through our API (or you can also try a version of this demo with the Agent loaded in the browser session.")
-def New_Agent():
+def New_Agent(deployment):
     st.session_state.agent_id = agent
     st.session_state.agent_results = np.zeros( (100,  5), dtype='O')
     st.session_state.agent_trials = 0
-agent = st.text_input('Agent Name', value='1st of Clams', on_change=New_Agent)
+
+    Agent = {
+        'deployment': deployment,
+        'trials': str(0),
+        # 'tested (bulk)': str(st.session_state.tested)+" - "+str(test_size),
+        # 'accuracy (bulk)': "",
+        # 'no guesses (bulk)': "",
+        # 'recs (autocomplete)': str(0),
+        # 'mistakes (autocomplete)': str(0),
+        }
+    st.session_state.Agents[ agent ] = Agent
+       
+agent = st.text_input("Create a Local Agent", value="1st of Clams - local", on_change=New_Agent, args=("Local"))
+agent = st.text_input("Create an Agent via our API", value='1st of Clams - api', on_change=New_Agent, args=("API"))
 if agent == '1st of Clams' and 'agent_id' not in st.session_state: New_Agent()    
 st.write("The current Agent is::::", agent)
 st.write("")
@@ -89,8 +130,8 @@ if labels_ONOFF is True:
     if labels_CHOICE == 'CLOSE the Clam': LABEL = 0
 st.write("")
 
-user_INPUT = st.multiselect("STEP 1) Show the Clam this input:", ['FOOD', 'A-CHEMICAL', 'C-CHEMICAL'])
-user_STATES = st.slider('This many times', 1, 10)
+user_INPUT = st.multiselect("STEP 1) Show the Clam this input pattern:", ['FOOD', 'A-CHEMICAL', 'C-CHEMICAL'])
+user_STATES = st.slider('This many times:', 1, 10)
 st.write("")
 st.write("")
 
@@ -109,17 +150,17 @@ def run_agent():
     
     responses = []
     for x in np.arange(user_STATES):
-        response= agent_api_call(st.session_state.agent_id, INPUT, api_key, label=LABEL)        
+        response= agent_api_call(st.session_state.agent_id, INPUT, label=LABEL)        
         print(response)
         print([int(response.json()['story'])])
-        responses += [int(response.json()['story'])]
+        responses += [int(response)]
 
     # save trial results for dispplaying to enduser    
     final_totals = sum(responses) / user_STATES * 100
     if labels_ONOFF == True: Label_Insti = "LABEL"
     elif instincts_ONOFF == True: Label_Insti = "INSTI"
     else: Label_Insti ="NONE"
-    st.session_state.agent_results[st.session_state.agent_trials, :] = ["Trial #"+str(st.session_state.agent_trials), INPUT, user_STATES, Label_Insti, str(final_totals)+"%"]    
+    st.session_state.agent_results[st.session_state.agent_trials, :] = ["Trial #"+str(st.session_state.agent_trials), INPUT, user_STATES, Label_Insti, str(final_totals)+"%"]
     
     st.session_state.agent_trials += 1
 
