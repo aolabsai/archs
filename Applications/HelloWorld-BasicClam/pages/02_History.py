@@ -34,18 +34,15 @@ st.text("")
 
 
 
-if 'agent' not in st.session_state: st.text("Start your experiment first to view the history.")
+if st.session_state.Agents[st.session_state.agent_id]['deployment'] is "API":
 
-
-
-
-    
-
-
+    st.text("Please spin up a Agent Locally to view its history (We haven't expose Agent history in our API yet).")
 
 else:
+    Agent = st.session_state.Local_Agents[ st.session_state.agent_id ]
 
-    if hasattr(st.session_state.agent.neurons[3], 'tsets') is not True: st.write("The Clam is still untrained; try exposing it stimulus with LABELS or INSTINCTS activated. Then you'll be able to see the neuron-level histories, too.")
+
+    if hasattr(Agent.neurons[3], 'tsets') is not True: st.write("The Clam is still untrained; try exposing it stimulus with LABELS or INSTINCTS activated. Then you'll be able to see the neuron-level histories, too.")
     else:
         with st.expander("Access memory of individual neurons here"):
     
@@ -56,8 +53,8 @@ else:
             if 'Q2' in neuron_SEL: SEL = 5
             if 'Z0' in neuron_SEL: SEL = 6
                 
-            neuron_story = st.session_state.agent.neurons[SEL].tsets.astype(int)
-            neuron_outputs = st.session_state.agent.neurons[SEL].outputs.astype(int)
+            neuron_story = Agent.neurons[SEL].tsets.astype(int)
+            neuron_outputs = Agent.neurons[SEL].outputs.astype(int)
             
             tcol1, tcol2 = st.columns(2)
             
@@ -69,9 +66,9 @@ else:
                 st.header("Outputs")
                 st.write(neuron_outputs)
     
-    story = st.session_state.agent.story[0: st.session_state.agent.state+1, np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 10])].astype(int)
+    story = Agent.story[0: Agent.state+1, np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 10])].astype(int)
     
-    metastory = st.session_state.agent.metastory[0: st.session_state.agent.state+1, np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 10])].astype(str)
+    metastory = Agent.metastory[0: Agent.state+1, np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 10])].astype(str)
      
     col1, col2 = st.columns([1.5, 3])
 
