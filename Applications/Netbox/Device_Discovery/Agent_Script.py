@@ -52,7 +52,7 @@ discovered_devices = []
 
 
 # Name your Agent; you can create as many as you need; Agents are not pre-trained
-agent_id = "Netreplica Test Agent 5"
+agent_id = "Netreplica Test Agent"
 
 
 # Training your Agent on Devices list
