@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """
-Script to Run Netbox Device Discovery Agent 
+Script to Run Device Discovery AI Agents for Self-Host NetBox
 
-- should work locally given API connection to Agents
-- Agents are hosted on our API, reference https://docs.aolabs.ai/reference/agentinvoke
-- our demo API is throttled, so latency per Agent per device is around 1.38 seconds; we can beef this up for your production needs, just ping us
-- if they prove useful, you can also host Agents locally (on simple python env); again just ping us :)
+- run this script in the env where you host your NetBox instance; it uses the pynetbox module to connect to your device info only
+- Agents are persistently hosted on our Agents-as-a-Service API, reference https://docs.aolabs.ai/reference/agentinvoke
+- for this script the API is throttled, so latency per Agent per device is around 1.38 seconds; we can beef this up for your production needs, just ping us
+- if Agents prove useful, you can also host Agents locally (on simple python env); again just ping us for access
 
 www.aolabs.ai
 """
@@ -38,10 +38,10 @@ def agent_api_call(agent_id, input_data, label=None):
     return response
 
 
-# Getting Devices list from Netbox
+# Getting Devices list from NetBox
 nb = pynetbox.api(
     "https://demo.netbox.dev/",
-    token= "a112ecc9164506381125748adad1943c71e87939", # insert API token here as a string
+    token= "a112ecc9164506381125748adad1943c71e87939", # insert API token here as a string, get from https://demo.netbox.dev/user/api-tokens/
     threading=True)
 try:
     devices = list(nb.dcim.devices.all())
@@ -81,5 +81,6 @@ print("Role ID response: " +str( int(response, 2) ))
 
     
 # Need to re-train Agent? Any time label is passed through, Agent learns it
-
 # Need more than 3 input fields for your *platform* use-case? This Agent was configured with 3 inputs to 1 output; its configuration is easy to expand and can be found here: https://github.com/aolabsai/archs/blob/main/Architectures/netbox-device_discovery.py
+
+# Agents are fully interpertable (not a blackbox), as they store all past states in their lookup table (only states labelled by a label or instinct trigger are used for learning; the rest is pruned)

@@ -157,7 +157,7 @@ def train_agents(deployment):
 
 # Streamlit-powered frontend
 st.set_page_config(
-    page_title="Local Device Discovery AI Agent - demo by aolabs.ai",
+    page_title="Device Discovery via Locally-Trained AI Agents - demo by aolabs.ai",
     page_icon="https://i.imgur.com/j3jalQE.png",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -167,8 +167,11 @@ st.set_page_config(
         'About': "This is a demo of our AI features. Check out www.aolabs.ai and docs.aolabs.ai for more. Thank you!"
     }
 )
-st.title('Local AI Agents for Netbox Device Discovery')
-st.write("### *a demo by [aolabs.ai](https://www.aolabs.ai/)*")
+st.title('Local AI Agents for Network Device Discovery')
+st.write("### *a demo by [aolabs.ai](https://www.aolabs.ai/) for NetBox Cloud*")
+st.write("")
+st.write("_:red[Note:] if your NetBox is self-hosted, try this [python script](https://github.com/aolabsai/archs/blob/application/Netbox_devicediscovery/Applications/Netbox/Device_Discovery/Agent_Script.py)._")
+st.write("")
 st.write("")
 
 # side bar content
@@ -183,7 +186,7 @@ if 'agent_id' not in st.session_state:
     agent_deployment = ""
 else:
     active_agent = "**Current Agent:** :violet["+st.session_state.agent_id+"]"
-    agent_deployment = "Agent deployed :blue["+st.session_state.Agents[st.session_state.agent_id]['deployment']+"]"
+    agent_deployment = "Agent Deployment: :blue["+st.session_state.Agents[st.session_state.agent_id]['deployment']+"]"
 with st.sidebar:    
     st.write(data_source)
     st.write(active_agent)
@@ -195,14 +198,14 @@ left_big, right_big = st.columns([0.7, 0.3])
 
 with right_big:
     st.image("https://i.imgur.com/eZyVouO.png")
-    st.markdown("*The Netbox Devices UI at [demo.netbox.dev/dcim/devices/](https://demo.netbox.dev/dcim/devices/)*", help="Login with username **admin** and password **admin**.")
+    st.markdown("*The NetBox Devices UI at [demo.netbox.dev/dcim/devices/](https://demo.netbox.dev/dcim/devices/)*", help="Login with username **admin** and password **admin**.")
 
 with left_big:
     instruction_md = """### Welcome! How this works: \n
-* Connect an unique Agent to a Netbox account (by entering a Netbox url and API token; you can use the [public Netbox demo](https://demo.netbox.dev/))\n
-* Train your Agent on the account's local list of **Network Devices'** **:green[Manufacters]**, **:green[Types]**, and **:green[Sites]** to infer the ***:blue[Roles]*** of newly discovered devices and supplement manual role assignment\n
-* Agents are not pre-trained on any other data and can live in state with your list of devices if used in your application; this demo presented a snapshot\n
-* After entering the info below to train an Agent, view its predictions in the sidebar as a *bulk import service* or as a *context-aware auto-complete*"""
+* Connect an unique Agent to a NetBox Cloud instance by entering a url and an API token. If  you can use the [public NetBox Cloud demo](https://demo.netbox.dev/))\n
+* Train your Agent on the account's list of **Network Devices'** **:green[Manufacters]**, **:green[Types]**, and **:green[Sites]** to infer the ***:blue[Roles]*** of newly discovered devices and supplement manual role assignment\n
+* Agents are not pre-trained on any other data and can live in state with your list of devices\n
+* View Agents' performance predictions in the sidebar as a *bulk import service* or as a *context-aware auto-complete*"""
     st.markdown(instruction_md)
     st.write("---")
     
@@ -211,40 +214,40 @@ with left_big:
     
     ## Netbox account
     with left:
-        st.session_state.nb_USER_url = st.text_input('Enter your Netbox account URL:', "https://demo.netbox.dev/")
-        help_netbox_api = "If you don't have a Netbox account, you can a get temporary API token by logging in to the [Netbox public demo instance](https://demo.netbox.dev/user/api-tokens/) with username *admin* and password *admin*."
-        st.session_state.nb_USER_api_token = st.text_input('Enter your Netbox account API token:',  type='password', help=help_netbox_api)
+        st.session_state.nb_USER_url = st.text_input('Enter a NetBox Cloud URL:', "https://demo.netbox.dev/")
+        help_netbox_api = "You can a get temporary API token by logging in to the [NetBox Public Demo here](https://demo.netbox.dev/user/api-tokens/) with username *admin* and password *admin*."
+        st.session_state.nb_USER_api_token = st.text_input('Enter an NetBox API token:',  type='password', help=help_netbox_api)
     
         left_filled = len(st.session_state.nb_USER_url) > 0 and len(st.session_state.nb_USER_api_token) > 0
-        st.button("Connect Netbox Account", type="primary", on_click=add_netbox, disabled=not(left_filled))
+        st.button("Connect NetBox Account", type="primary", on_click=add_netbox, disabled=not(left_filled))
            
+        # Post account added messages
         if 'account_added' in st.session_state:
             if st.session_state.account_added is True:
-                st.write(":green[Netbox Account Successfully Connected]; there {} devices on this Netbox account available for training/testing.".format(st.session_state.num_devices))
+                st.write(":green[NetBox Account Successfully Connected]; there {} devices in this account available for training/testing.".format(st.session_state.num_devices))
             
         if 'valid_netbox_apikey' in st.session_state:
             if st.session_state.valid_netbox_apikey is False:
-                st.write(":red[Invalid Netbox API Key--] *please try again*.")
+                st.write(":red[Invalid NetBox API Token--] *please try again*.")
     
     ## Training and test configuration
     with right:
-        st.session_state.USER_num_total_devices = st.number_input("How many of the available devices in this Netbox account would you like to use for this demo?" , min_value=2, max_value=st.session_state.num_devices, disabled=not(st.session_state.account_added))
-        x = st.session_state.USER_num_total_devices
-        max_test_devices = x-1
+        x = st.session_state.num_devices
+        st.session_state.USER_num_total_devices = st.number_input("How many of the ("+str(x)+") available devices would you like to use for this demo?" , min_value=2, max_value=st.session_state.num_devices, disabled=not(st.session_state.account_added))
+        y = st.session_state.USER_num_total_devices
+        max_test_devices = y-1
         help_numtest = "The rest of the devices will be used for training the Agent."
-        st.session_state.USER_num_test_devices = st.number_input("Of those ("+str(x)+") devices, how many should be withheld to TEST the Agent?" , min_value=1, max_value=max_test_devices, disabled=not(st.session_state.account_added), help=help_numtest)
+        st.session_state.USER_num_test_devices = st.number_input("Of those ("+str(y)+") devices, how many should be withheld as newly discovered devices, to test the Agent?" , min_value=1, max_value=max_test_devices, disabled=not(st.session_state.account_added), help=help_numtest)
         st.session_state.agent_id_field = st.text_input("Enter a unique name for this Agent", disabled=not(st.session_state.account_added))
     
         right_filled = len(st.session_state.agent_id_field) > 0
-        st.button("Deploy & Train Your Agent [:violet[locally]]",type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), args= ("Local",), help="The Agent will be running in the Streamlit browser session; Agents are by design lightweight enough to run on the edge")
-        st.button("Deploy & Train Your Agent [:blue[via our API]]", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), args = ("API",), help="We'll host your Agent on our AWS via our API, so you can even invoke this Agent from anywhere else https://docs.aolabs.ai/reference/agentinvoke")
+        st.button("Deploy Your Agent :blue[via our API]", type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), args = ("API",), help="We'll host your Agent on our AWS via our API, so you can even invoke this Agent from anywhere else https://docs.aolabs.ai/reference/agentinvoke")
+        st.button("Deploy Your Agent :violet[Locally]",type="primary", on_click=train_agents, disabled=not(st.session_state.account_added) or not(right_filled) or not(st.session_state.minimum_devices), args= ("Local",), help="The Agent will be running in the Streamlit browser session; Agents are by design lightweight enough to run locally.")
 
-
-# Post training message
-if 'trained' in st.session_state:
-    st.write('***:violet[Agent Training Complete]***')
-    st.write("From "+st.session_state.nb_USER_url+" via API token: ..."+st.session_state.nb_USER_api_token[-6:])  
-    device_count = st.session_state.train_size + len(st.session_state.test_devices_in)
-    st.write("")
-    st.write("- {num_devices} devices were used\n- {num_train} for training the Agent\n- {num_test} for testing".format(num_devices=device_count, num_train=st.session_state.train_size, num_test=len(st.session_state.test_devices_in)))
-    st.write("View the Agent's performance by clicking the pages in the sidebar.")
+        # Post training message
+        if 'trained' in st.session_state:
+            st.write('***:violet[Agent Training Complete]***')
+            st.write("From "+st.session_state.nb_USER_url+" via API token: XXXX-"+st.session_state.nb_USER_api_token[-5:])  
+            device_count = st.session_state.train_size + len(st.session_state.test_devices_in)
+            st.write("- {num_devices} devices were used\n- {num_train} for training the Agent\n- {num_test} for testing".format(num_devices=device_count, num_train=st.session_state.train_size, num_test=len(st.session_state.test_devices_in)))
+            st.write("View the Agent's performance by clicking the pages in the sidebar.")
