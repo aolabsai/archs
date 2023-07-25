@@ -11,7 +11,7 @@ import streamlit as st
 import requests
 
 
-# Returns json, result stored in json as Agent's 'story'
+
 def agent_api_call(agent_id, input_data, label=None, deployment="Local"):
 
     if deployment == "API":
@@ -42,11 +42,7 @@ def agent_api_call(agent_id, input_data, label=None, deployment="Local"):
     if deployment == "Local":
         if label == None:
             label = []
-        if agent_id not in st.session_state.Local_Agents:
-            agent = st.session_state.Local_Core( st.session_state.Local_Arch )
-            st.session_state.Local_Agents[agent_id] = agent
-        else:
-            agent = st.session_state.Local_Agents[agent_id]
+        agent = st.session_state.Local_Agents[agent_id]
         agent.reset_state()
         agent.next_state( list(input_data), [label], unsequenced=True)
         response = agent.story[ agent.state-1, agent.arch.Z__flat ]
@@ -97,12 +93,15 @@ if "Agents" not in st.session_state:
 if 'agent_id' not in st.session_state:
     active_agent = "**Current Agent:** :red[*No Agent(s) Yet*]"
     agent_deployment = ""
+    agent_state = ""
 else:
     active_agent = "**Current Agent:** :violet["+st.session_state.agent_id+"]"
     agent_deployment = "**Agent Deployment:** :blue["+st.session_state.Agents[st.session_state.agent_id]['deployment']+"]"
+    agent_state = "**Agent State:** :green["+st.session_state.Agents[st.session_state.agent_id]['state']+"]"
 with st.sidebar:    
     st.write(active_agent)
     st.write(agent_deployment)
+    # st.write(agent_state)
 st.sidebar.image("https://i.imgur.com/n0KciAE.png", use_column_width=True)"""
 exec(st.session_state.side_bar_content)
 
@@ -136,7 +135,7 @@ with st.expander("About & Context", expanded=True):
     """)
     
 
-st.title("CLam Test Bed - v0.1.1")
+st.title("Clam Test Bed - v0.1.1")
 
 left_big_bottom, right_big_bottom = st.columns([0.6, 0.4])
 
@@ -174,17 +173,15 @@ with left_big_bottom:
             # 'mistakes (autocomplete)': str(0),
             }
         st.session_state.Agents[ st.session_state.agent_id ] = Agent       
+        if deployment == "Local":
+            agent = st.session_state.Local_Core( st.session_state.Local_Arch )
+            st.session_state.Local_Agents[st.session_state.agent_id] = agent            
     
     st.session_state.agent_id_field = st.text_input("Name your Agent", value="1st of Clams",  label_visibility="hidden")
     
-    lef, mid, rig = st.columns([0.4, 0.2, 0.4])
+    st.button("Create Agent Locally", on_click=New_Agent, args=("Local",), type="primary")
+    st.button("Or Create Agent via API", on_click=New_Agent, args=("API",))
 
-    with lef:
-        st.button("Create Agent Locally", on_click=New_Agent, args=("Local",))
-    with mid:
-        st.write(" or ")
-    with rig:
-        st.button("Create Agent via API", on_click=New_Agent, args=("API",))
     if "agent_id" not in st.session_state: pass #st.write("Load up an Agent!")
     else: st.write("Current Agent:  " + st.session_state.agent_id)
     st.write("---")
@@ -241,7 +238,7 @@ with left_big_bottom:
         st.write("### Step 2) Run Trial #"+str(st.session_state.agent_trials))
         if user_STATES == 1: button_text= 'Expose Clam ONCE'
         if user_STATES > 1: button_text= 'Expose Clam '+str(user_STATES)+' times'
-        st.button(button_text, on_click=run_agent)
+        st.button(button_text, on_click=run_agent, type="primary")
     
 st.write("---")
 

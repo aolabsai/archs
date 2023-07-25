@@ -44,12 +44,13 @@ else:
 st.write("*View all of the Agents you've called during this browser session.*")
 st.write("")
 st.write("")
-if "Agents" in st.session_state:
-    if st.session_state.Agents == {}: st.text("You have not created any Agents yet.")
+if "Agents" not in st.session_state or st.session_state.Agents == {}:
+    st.text("You have not created any Agents yet.")
+    Agent = None
+else:
+    Agent_keys = list( st.session_state.Agents.keys() )
     st.dataframe( pd.DataFrame.from_dict( st.session_state.Agents ) )
-
-Agent_keys = list( st.session_state.Agents.keys() )
-Agent = st.selectbox("Select an Agent to View its History:", Agent_keys)
+    Agent = st.selectbox("Select an Agent to View its History:", Agent_keys)
 
 if Agent is not None:
 
@@ -93,8 +94,8 @@ if Agent is not None:
                 if 'Q2' in neuron_SEL: SEL = 5
                 if 'Z0' in neuron_SEL: SEL = 6
                     
-                neuron_story = st.session_state.agent.neurons[SEL].tsets.astype(int)
-                neuron_outputs = st.session_state.agent.neurons[SEL].outputs.astype(int)
+                neuron_story = Agent_View_Local.neurons[SEL].tsets.astype(int)
+                neuron_outputs = Agent_View_Local.neurons[SEL].outputs.astype(int)
     
                 tcol1, tcol2 = st.columns(2)
                 
@@ -110,26 +111,31 @@ if Agent is not None:
     state = mem['state']
     story = mem['story']
     
-    story = story[0: state, np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 10])].astype(int)
-    
+    story = story[ 0:state , np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 10])].astype(int)
+
+    only_experience_states = np.arange(0, story.shape[0], 2)    
+    story = story[ only_experience_states, :]
     
     if Agent_View['deployment'] == "API":
     
-        st.header("Story")
+        st.write("## Story up to State "+str(state))
         st.write(story)
     
-    elif Agent_View['deployment'] == "Local":
+    elif Agent_View['deployment'] == "Local" and state > 1:
     
-        metastory = Agent_View_Local.metastory[0: Agent_View_Local.state, np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 10])].astype(str)
+        metastory = Agent_View_Local.metastory[  0:state , np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 10])].astype(str)
+
+        only_experience_states = np.arange(0, Agent_View_Local.metastory.shape[0], 2)
+        metastory = metastory[ only_experience_states, :]
          
         col1, col2 = st.columns([1.5, 3])
     
         with col1:
-            st.header("Story")
+            st.write("## Story up to State "+str(state))
             st.write(story)
                 
         with col2:
-            st.header("Metastory")
+            st.write("## Metastory")
             st.write(metastory)
 
 
