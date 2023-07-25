@@ -206,8 +206,8 @@ with left_big:
 * Train your Agent on the account's list of **Network Devices'** **:green[Manufacters]**, **:green[Types]**, and **:green[Sites]** to infer the ***:blue[Roles]*** of newly discovered devices and supplement manual role assignment\n
 * Agents are not pre-trained on any other data and can live in state with your list of devices\n
 * View Agents' performance predictions in the sidebar as a *bulk import service* or as a *context-aware auto-complete*"""
-    st.markdown(instruction_md)
-    st.write("---")
+    with st.expander("Instructions"):
+        st.markdown(instruction_md)
     
     # Capture USER inputs
     left, right = st.columns(2)
