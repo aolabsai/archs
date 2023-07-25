@@ -20,7 +20,7 @@ def agent_api_call(agent_id, input_data, label=None, deployment="Local"):
         payload = {
             "kennel_id": "v0dev/TEST-BedOfClams",
             "agent_id": agent_id,
-            "INPUT": input_dat,
+            "INPUT": input_data,
             "control": {
                 "US": True
             }
@@ -87,9 +87,8 @@ st.set_page_config(
 )
 
 # App Front End
-st.title('AO Labs v0.1.0 Clam Demo')
-st.image("https://i.imgur.com/cTHLQYL.png")
-st.markdown("*Note: This app is not yet a standalone experience; please visit [this guide for more context](https://docs.google.com/document/d/1cUmTXsf7bCIMGKm3RHn001Qya-tZcFTvgCPj4Ynu2_M/edit).*")
+st.title('Hello, World! A Clam-Level General Intelligence')
+st.write("### *a demo by [aolabs.ai](https://www.aolabs.ai/)*")
 
 # side bar content
 st.session_state.side_bar_content = """
@@ -100,100 +99,155 @@ if 'agent_id' not in st.session_state:
     agent_deployment = ""
 else:
     active_agent = "**Current Agent:** :violet["+st.session_state.agent_id+"]"
-    agent_deployment = "Agent deployed :blue["+st.session_state.Agents[st.session_state.agent_id]['deployment']+"]"
+    agent_deployment = "**Agent Deployment:** :blue["+st.session_state.Agents[st.session_state.agent_id]['deployment']+"]"
 with st.sidebar:    
     st.write(active_agent)
     st.write(agent_deployment)
-st.sidebar.image("https://raw.githubusercontent.com/netbox-community/netbox/develop/docs/netbox_logo.svg", use_column_width=True)"""
+st.sidebar.image("https://i.imgur.com/n0KciAE.png", use_column_width=True)"""
 exec(st.session_state.side_bar_content)
 
-st.write("")
-st.write("")
-st.write("")
-st.write("First, name your Clam Agent.")
-st.write(" Agents maintain persistant state and are auto-provisioned through our API (or you can also try a version of this demo with the Agent loaded in the browser session.")
-def New_Agent(deployment):
-    st.session_state.agent_trials = 0
-    st.session_state.agent_id = st.session_state.agent_id_field
-    st.session_state.agent_results = np.zeros( (100,  5), dtype='O')
 
-    Agent = {
-        'deployment': deployment,
-        'trials': str(0),
-        'last_trial': "",
-        'state' : str(0),
-        '%_closed' : str(0),
-        # 'tested (bulk)': str(st.session_state.tested)+" - "+str(test_size),
-        # 'accuracy (bulk)': "",
-        # 'no guesses (bulk)': "",
-        # 'recs (autocomplete)': str(0),
-        # 'mistakes (autocomplete)': str(0),
-        }
-    st.session_state.Agents[ st.session_state.agent_id ] = Agent       
-
-st.session_state.agent_id_field = st.text_input("First, name your Clam Agent.", value="1st of Clams")
-st.button("Create Agent Locally", on_click=New_Agent, args=("Local",))
-st.button("Create Agent via API", on_click=New_Agent, args=("API",))
-if "agent_id" not in st.session_state: st.write("Load up an Agent!")
-else: st.write("Current Agent:  " + st.session_state.agent_id)
-st.write("")
-st.markdown('#')
-st.markdown('##')
-st.write("STEP 0) Activate learning:")
-instincts_ONOFF = st.checkbox('Instincts On')
-labels_ONOFF = st.checkbox('Labels On')
-if labels_ONOFF & instincts_ONOFF is True: st.write('Note: the presence of labels overrides any instinctual learning.')
-LABEL = None
-if labels_ONOFF is True:
-    labels_CHOICE = st.radio('Pick one', ['OPEN the Clam', 'CLOSE the Clam'])
-    if labels_CHOICE == 'OPEN the Clam': LABEL = 1
-    if labels_CHOICE == 'CLOSE the Clam': LABEL = 0
-st.write("")
-
-user_INPUT = st.multiselect("STEP 1) Show the Clam this input pattern:", ['FOOD', 'A-CHEMICAL', 'C-CHEMICAL'])
-user_STATES = st.slider('This many times:', 1, 10)
-st.write("")
-st.write("")
-
-if "agent_id" not in st.session_state: st.write("Connect an Agent to start")
-else: st.write("STEP 2) Run Trial: "+str(st.session_state.agent_trials))
-if user_STATES == 1:button_text= 'Expose Clam ONCE'
-if user_STATES > 1: button_text= 'Expose Clam '+str(user_STATES)+' times'
-
-# Run the Agent Trial
-def run_agent():
-    Agent = st.session_state.Agents[ st.session_state.agent_id ]
+with st.expander("About & Context", expanded=True):
     
-    # INPUTS
-    INPUT = [0, 0, 0]
-    if 'FOOD'       in user_INPUT: INPUT[0] = 1
-    if 'A-CHEMICAL' in user_INPUT: INPUT[1] = 1
-    if 'C-CHEMICAL' in user_INPUT: INPUT[2] = 1
+    left_big_top, right_big_top = st.columns([0.5, 0.5])
     
-    responses = []
-    for x in np.arange(user_STATES):
-        response= agent_api_call(st.session_state.agent_id, INPUT, label=LABEL)        
-        print(response)
-        responses += [int(response)]
+    with left_big_top:
+        st.image("https://i.imgur.com/EiFhojY.png")
+    
+    with right_big_top:
+        st.markdown("""
+        ### Did you know that :blue[clams] can be trained like dogs and other animals? \n
+        They can learn to associate outputs, opening or closing, to different input patterns. For instance, clams in the captivity can learn to remain open around shadows [[source](https://dantheclamman.blog/2019/06/02/thoughts-of-a-clam/#:~:text=When%20a%20certain,do%20my%20work.)].\n
+        This intuitive type of cognition, so obvious in animals but so far neglected in AI, has 3 main advantages that deep learning lacks: \n
+        * Continous learning:  no gap between training and inference \n
+        * Fully transparency: learned behavior can be traced back to training history or how its been conditioned\n
+        * Self-grounding: learned behavior can never be out-of-distribution from training history \n
+        """)
+    
+    st.write("")
+    st.write("")
+    st.write("")
+        
+    st.markdown("""
+    This is a demo of the simplest form of this function, a thought experiment of a 3-input and single-output clam. The 3 inputs the Clam can sense are Chemical-A and Chemical-B, which start of as neutral inputs, and Food, which in the clam is configured to trigger positive between input and output. The output is opening or closing. \n
+    Can you bend the Clam Agent to your will? Can you grok the potential here?\n
+    Can you imagine training in this way an even more capable Agent, one with a greater number of input-outputs to learn to associate?  \n
+    We're building more complex Agents and at the same time making them useful in applications; a scaled up version of the 4-neuron Clam Agent demonstated here is solving for [network device discovery](https://aolabs-netbox.streamlit.app/).  \n
+    """)
+    
 
-    # save trial results for dispplaying to enduser    
-    final_totals = sum(responses) / user_STATES * 100
-    if labels_ONOFF == True: Label_Insti = "LABEL"
-    elif instincts_ONOFF == True: Label_Insti = "INSTI"
-    else: Label_Insti ="NONE"
+st.title("CLam Test Bed - v0.1.1")
+
+left_big_bottom, right_big_bottom = st.columns([0.6, 0.4])
+
+with right_big_bottom:
+
+    st.image("https://i.imgur.com/FaKTGkG.png")
+    st.markdown("""            
+    ### Notes:            
+    * A fresh, untrained Agent will Open and Close randomly to any input pattern. \n
+    * Agents can be trained by expliciting passing through input and output pairs--- this is the **Labels On** mode \n
+    * Agents can be trained more automatically by pairing Food with particular input patters - this is the **Instincts On** mode \n
+    """)
+#    If the Clam Agent has its mouth Open in the presence of Food, it'll learn, eg. try pairing Food with Chemical-A with Instincts On and the Agent will learn to associate Chemical-A with Food and therefore with Opening, i.e. going forward the Agent will respond to Chemical-A even in the absence of Food while still ignoring Chemical-B. \n
+
+
+with left_big_bottom:    
+
+    st.write("### First, name your Clam Agent")
+#    st.write(" Agents maintain persistant state and are auto-provisioned through our API (or you can also try a version of this demo with the Agent loaded in the browser session.")
+    def New_Agent(deployment):
+        st.session_state.agent_trials = 0
+        st.session_state.agent_id = st.session_state.agent_id_field
+        st.session_state.agent_results = np.zeros( (100,  5), dtype='O')
     
-    st.session_state.agent_results[st.session_state.agent_trials, :] = ["Trial #"+str(st.session_state.agent_trials), INPUT, user_STATES, Label_Insti, str(final_totals)+"%"]
-    st.session_state.agent_trials += 1
-    Agent['trials'] = str(st.session_state.agent_trials)
-    Agent['last_trial'] = "Trial #"+str(st.session_state.agent_trials)+"with input"+str(INPUT)+" repeated "+str(user_STATES)+" with learning:"+Label_Insti+" for "+ str(final_totals)+"% opening"
+        Agent = {
+            'deployment': deployment,
+            'trials': str(0),
+            'last_trial': "",
+            'state' : str(0),
+            '%_closed' : str(0),
+            # 'tested (bulk)': str(st.session_state.tested)+" - "+str(test_size),
+            # 'accuracy (bulk)': "",
+            # 'no guesses (bulk)': "",
+            # 'recs (autocomplete)': str(0),
+            # 'mistakes (autocomplete)': str(0),
+            }
+        st.session_state.Agents[ st.session_state.agent_id ] = Agent       
+    
+    st.session_state.agent_id_field = st.text_input("", value="1st of Clams")
+    
+    lef, mid, rig = st.columns([0.4, 0.2, 0.4])
+
+    with lef:
+        st.button("Create Agent Locally", on_click=New_Agent, args=("Local",))
+    with mid:
+        st.write(" or ")
+    with rig:
+        st.button("Create Agent via API", on_click=New_Agent, args=("API",))
+    if "agent_id" not in st.session_state: pass #st.write("Load up an Agent!")
+    else: st.write("Current Agent:  " + st.session_state.agent_id)
+    st.write("---")
+    st.write("### Step 0) Activate learning:")
+    instincts_ONOFF = st.checkbox('Instincts On')
+    labels_ONOFF = st.checkbox('Labels On')
+    if labels_ONOFF & instincts_ONOFF is True: st.write('Note: the presence of labels overrides any instinctual learning.')
+    LABEL = None
+    if labels_ONOFF is True:
+        labels_CHOICE = st.radio('Pick one', ['OPEN the Clam', 'CLOSE the Clam'])
+        if labels_CHOICE == 'OPEN the Clam': LABEL = 1
+        if labels_CHOICE == 'CLOSE the Clam': LABEL = 0
+    
+    st.write("")
+    
+    st.write("### Step 1) Set an input pattern:")
+    placeholder = "Choose any combination of Food, A-Chem, B-Chem, or none of them"
+    user_INPUT = st.multiselect(label="Set an input pattern:", options=['FOOD', 'A-CHEMICAL', 'B-CHEMICAL'], label_visibility="hidden", help= placeholder)
+    user_STATES = st.slider('To be repeated this many times:', 1, 10)
+    st.write("")
+    st.write("")
+
+
+    # Run the Agent Trial
+    def run_agent():
+        Agent = st.session_state.Agents[ st.session_state.agent_id ]
+        
+        # INPUTS
+        INPUT = [0, 0, 0]
+        if 'FOOD'       in user_INPUT: INPUT[0] = 1
+        if 'A-CHEMICAL' in user_INPUT: INPUT[1] = 1
+        if 'B-CHEMICAL' in user_INPUT: INPUT[2] = 1
+        
+        responses = []
+        for x in np.arange(user_STATES):
+            response= agent_api_call(st.session_state.agent_id, INPUT, label=LABEL)        
+            print(response)
+            responses += [int(response)]
+    
+        # save trial results for dispplaying to enduser    
+        final_totals = sum(responses) / user_STATES * 100
+        if labels_ONOFF == True: Label_Insti = "LABEL"
+        elif instincts_ONOFF == True: Label_Insti = "INSTI"
+        else: Label_Insti ="NONE"
+        
+        st.session_state.agent_results[st.session_state.agent_trials, :] = ["Trial #"+str(st.session_state.agent_trials), INPUT, user_STATES, Label_Insti, str(final_totals)+"%"]
+        st.session_state.agent_trials += 1
+        Agent['trials'] = str(st.session_state.agent_trials)
+        Agent['last_trial'] = "Trial #"+str(st.session_state.agent_trials)+"with input"+str(INPUT)+" repeated "+str(user_STATES)+" with learning:"+Label_Insti+" for "+ str(final_totals)+"% opening"
 
     
-if user_STATES == 1: button_text= 'Expose Clam ONCE'
-if user_STATES > 1: button_text= 'Expose Clam '+str(user_STATES)+' times'
-st.button(button_text, on_click=run_agent)
+    if "agent_id" not in st.session_state: pass
+    else: 
+        st.write("### Step 2) Run Trial #"+str(st.session_state.agent_trials))
+        if user_STATES == 1:button_text= 'Expose Clam ONCE'
+        if user_STATES > 1: button_text= 'Expose Clam '+str(user_STATES)+' times'
+        st.button(button_text, on_click=run_agent)
+    
+st.write("---")
 
 # Display Trial Log Results
-if "agent_id" not in st.session_state: st.write("Load up an Agent!")
+st.write("### Trial #"+str(st.session_state.agent_trials)+" Result:")
+if "agent_id" not in st.session_state: st.write("*You have to create an Agent first*")
 else:
     display_trial = st.session_state.agent_trials-1
     print(display_trial)
@@ -207,5 +261,6 @@ else:
             if LABEL == 1: st.write("As you ordered, the Clam was OPEN, and learned to do so for the input you set.")
             else: st.write('The Clam OPENED  '+st.session_state.agent_results[display_trial, -1]+' of the time.')
     st.write("")
-    st.write('## Trial Results')
+    st.write("---")
+    st.write('### All Trials')
     st.text(str(st.session_state.agent_results[0:st.session_state.agent_trials, :]))  

@@ -5,20 +5,52 @@ Created on Wed Sep 28 12:55:14 2022
 @author: alebr
 """
 
-# first streamlit pag
-
-
-# AO Labs Modules
-import ao_core as ao
-
 # 3rd Party Modules
 import numpy as np
 import streamlit as st
 
-# st.set_page_config(layout="wide")
-# from PIL import Image
+
+# Returns json, result stored in json as Agent's 'story'
+def agent_api_call_history_request(agent_id, request):
+
+    url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel/agent"
+
+    payload = {
+        "kennel_id": "v0dev/TEST-BedOfClams",
+        "agent_id": agent_id,
+        "request": request,
+    }
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "X-API-KEY": "buildBottomUpRealAGI" # st.secrets["aolabs_api_key"]
+    }
+
+    response = requests.post(url, json=payload, headers=headers)
+    print(response)
+    response = response.json()['story']  # we can print the HTTP response here, too
+    return response
 
 
+# streamlit frontend
+st.title('View All Your Agents')
+if "side_bar_content" in st.session_state: exec(st.session_state.side_bar_content)
+else:
+    with st.sidebar:
+        st.write("*Go to the Main Page to start*")
+st.write("*View all of the Agents you've called during this browser session.*")
+st.write("")
+st.write("")
+if "Agents" in st.session_state:
+    if st.session_state.Agents == {}: st.text("You have not created any Agents yet.")
+    st.dataframe( pd.DataFrame.from_dict( st.session_state.Agents ) )
+else:
+    st.text("You have not created any Agents yet.")
+
+
+Agent_keys = list( st.session_state.Agents.keys() )
+
+Agent = st.selectbox("Select an Agent to View its History:", Agent_keys)
 
 
 
@@ -31,10 +63,9 @@ st.markdown("For now, please visit [aolabs.ai](https://www.aolabs.ai/), [docs.ao
 st.text("")
 st.text("")
 
-
-
-
-if st.session_state.Agents[st.session_state.agent_id]['deployment'] is "API":
+if st.session_state.Agents[ Agent ]['deployment'] == "API":
+    
+    mem = 
 
     st.text("Please spin up a Agent Locally to view its history (We haven't expose Agent history in our API yet).")
 
@@ -83,3 +114,12 @@ else:
     with col2:
         st.header("Metastory")
         st.write(metastory)
+
+
+
+
+left_big, right_big = st.columns([0.5, 0.5])
+with left_big:
+    st.write("")
+    st.image("https://i.imgur.com/n0KciAE.png")
+
