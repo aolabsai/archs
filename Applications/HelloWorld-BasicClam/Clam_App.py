@@ -42,11 +42,11 @@ def agent_api_call(agent_id, input_data, label=None, deployment="Local"):
     if deployment == "Local":
         if label == None:
             label = []
-        if agent_id not in st.session_state['Local_Agents']:
+        if agent_id not in st.session_state.Local_Agents:
             agent = st.session_state.Local_Core( st.session_state.Local_Arch )
-            st.session_state["Local_Agents"][agent_id] = agent
+            st.session_state.Local_Agents[agent_id] = agent
         else:
-            agent = st.session_state['Local_Agents'][agent_id]
+            agent = st.session_state.Local_Agents[agent_id]
         agent.reset_state()
         agent.next_state( list(input_data), [label], unsequenced=True)
         response = agent.story[ agent.state-1, agent.arch.Z__flat ]
@@ -112,7 +112,7 @@ with st.expander("About & Context", expanded=True):
     left_big_top, right_big_top = st.columns([0.5, 0.5])
     
     with left_big_top:
-        st.image("https://i.imgur.com/EiFhojY.png")
+        st.image("https://i.imgur.com/EiFhojY.png", caption="Clams are smarter than we think!")
     
     with right_big_top:
         st.markdown("""
@@ -129,7 +129,7 @@ with st.expander("About & Context", expanded=True):
     st.write("")
         
     st.markdown("""
-    This is a demo of the simplest form of this function, a thought experiment of a 3-input and single-output clam. The 3 inputs the Clam can sense are Chemical-A and Chemical-B, which start of as neutral inputs, and Food, which in the clam is configured to trigger positive between input and output. The output is opening or closing. \n
+    This is a demo of the simplest form of this function, a thought experiment of a 3-input and single-output clam. The 3 inputs the Clam can sense are Chemical-A and Chemical-B, which start of as neutral inputs, and Food, which in the clam is configured to trigger positive association between input and output. The output is opening or closing. \n
     Can you bend the Clam Agent to your will? Can you grok the potential here?\n
     Can you imagine training in this way an even more capable Agent, one with a greater number of input-outputs to learn to associate?  \n
     We're building more complex Agents and at the same time making them useful in applications; a scaled up version of the 4-neuron Clam Agent demonstated here is solving for [network device discovery](https://aolabs-netbox.streamlit.app/).  \n
@@ -175,7 +175,7 @@ with left_big_bottom:
             }
         st.session_state.Agents[ st.session_state.agent_id ] = Agent       
     
-    st.session_state.agent_id_field = st.text_input("", value="1st of Clams")
+    st.session_state.agent_id_field = st.text_input("Name your Agent", value="1st of Clams",  label_visibility="hidden")
     
     lef, mid, rig = st.columns([0.4, 0.2, 0.4])
 
@@ -220,7 +220,7 @@ with left_big_bottom:
         
         responses = []
         for x in np.arange(user_STATES):
-            response= agent_api_call(st.session_state.agent_id, INPUT, label=LABEL)        
+            response= agent_api_call(st.session_state.agent_id, INPUT, label=LABEL, deployment=Agent['deployment'])        
             print(response)
             responses += [int(response)]
     
@@ -239,18 +239,18 @@ with left_big_bottom:
     if "agent_id" not in st.session_state: pass
     else: 
         st.write("### Step 2) Run Trial #"+str(st.session_state.agent_trials))
-        if user_STATES == 1:button_text= 'Expose Clam ONCE'
+        if user_STATES == 1: button_text= 'Expose Clam ONCE'
         if user_STATES > 1: button_text= 'Expose Clam '+str(user_STATES)+' times'
         st.button(button_text, on_click=run_agent)
     
 st.write("---")
 
 # Display Trial Log Results
-st.write("### Trial #"+str(st.session_state.agent_trials)+" Result:")
+
 if "agent_id" not in st.session_state: st.write("*You have to create an Agent first*")
 else:
+    st.write("### Trial #"+str(st.session_state.agent_trials)+" Result:")
     display_trial = st.session_state.agent_trials-1
-    print(display_trial)
     if display_trial == -1: pass
     else:
         st.write("**Trial #"+str(display_trial)+" Results Summary**: You exposed the Clam Agent to "+str(st.session_state.agent_results[display_trial, 1])+' as input for '+str(st.session_state.agent_results[display_trial, 2])+'   times with learning mode '+str(st.session_state.agent_results[display_trial, 3])+'.')
