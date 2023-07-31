@@ -60,15 +60,15 @@ if "Local_Agents" not in st.session_state:
     st.session_state.Local_Arch = arch
     
     # retrieving Agent class locally from Core
-    # from github import Github, Auth    
-    # github_auth = Auth.Token(st.secrets["aolabs_github_auth"])
-    # github_client = Github(auth=github_auth)
-    # ao_core = github_client.get_repo("aolabsai/ao_core")
-    # content = ao_core.get_contents("ao_core/ao_core.py")
-    # exec(content.decoded_content, globals())
-    # st.session_state.Local_Core = Agent
-    import ao_core as ao
-    st.session_state.Local_Core = ao.Agent
+    from github import Github, Auth    
+    github_auth = Auth.Token(st.secrets["aolabs_github_auth"])
+    github_client = Github(auth=github_auth)
+    ao_core = github_client.get_repo("aolabsai/ao_core")
+    content = ao_core.get_contents("ao_core/ao_core.py")
+    exec(content.decoded_content, globals())
+    st.session_state.Local_Core = Agent
+    # import ao_core as ao
+    # st.session_state.Local_Core = ao.Agent
 
 st.set_page_config(
     page_title="AO Labs Demo App",
