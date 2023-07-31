@@ -1,8 +1,9 @@
----
 openapi: 3.0.0
 info:
   title: ao_core
-  description: "AI-Agents-as-a-Service API from [aolabs.ai](https://aolabs.ai)-- a new class of AI Agents that learn locally and continously, through conditioning, like animals."
+  description: "AI-Agents-as-a-Service API from [aolabs.ai](https://aolabs.ai)-- a\
+    \ new class of AI Agents that learn locally and continously, through conditioning,\
+    \ like animals."
   termsOfService: https://aolabs.ai/strategy/
   contact:
     name: AO Labs
@@ -24,7 +25,7 @@ security:
 - AWSapiKey: []
 tags:
 - name: kennel
-  description: a collection of agents representing an application
+  description: "a collection of agents representing an application"
   externalDocs:
     description: Find out more
     url: https://docs.aolabs.ai/reference/ao_core-intro-overview
@@ -36,6 +37,8 @@ tags:
 paths:
   /kennel:
     get:
+      security:
+        - AWSapiKey: []
       tags:
       - kennel
       summary: Get kennels
@@ -52,7 +55,8 @@ paths:
           type: string
       responses:
         "200":
-          description: Success - Here is a list of the application kennels you've created
+          description: Success - Here is a list of the application kennels you've
+            created
           content:
             application/json:
               schema:
@@ -66,12 +70,10 @@ paths:
                   $ref: '#/components/schemas/Kennel'
         "404":
           description: No applications yet-- POST /kennel to create your first!
-      security:
-      - AWSapiKey: []
       x-amazon-apigateway-integration:
         passthroughBehavior: when_no_match
         httpMethod: POST
-        uri: MASKED
+        uri: arn:aws:apigateway:us-east-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-2:096378249572:function:kennelGet/invocations
         responses:
           default:
             statusCode: "200"
@@ -84,6 +86,8 @@ paths:
               "kennel_id" : "$input.params('kennel_id')"
             }
     post:
+      security:
+        - AWSapiKey: []
       tags:
       - kennel
       summary: Create kennel
@@ -95,22 +99,34 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/KennelCreate'
+            examples:
+              Basic Clam Kennel:
+                value:
+                  kennel_name: TEST-Clamologist
+                  arch_URL: https://github.com/aolabsai/archs/blob/main/Architectures/basic_clam.py
+                  description: "the simplest, atomic arch reference design, our hello, world"
+                  permissions: free and open as the sea!
+              Netbox Device Discovery:
+                value:
+                  kennel_name: TEST-Netbox_DeviceDiscovery
+                  arch_URL: https://raw.githubusercontent.com/aolabsai/archs/main/Architectures/netbox-device_discovery.py
+                  description: "a 30-10-neuron Agent that predicts roles of devices on Netbox, eg. https://demo.netbox.dev/dcim/devices/"
+                  permissions: open
         required: true
       responses:
         "200":
-          description: Success - Kennel created; you can now deloy agents using this kennel
+          description: Success - Kennel created; you can now deloy agents using this
+            kennel
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Kennel'
         "405":
           description: Invalid input
-      security:
-      - AWSapiKey: []
       x-amazon-apigateway-integration:
         passthroughBehavior: when_no_match
         httpMethod: POST
-        uri: MASKED
+        uri: arn:aws:apigateway:us-east-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-2:096378249572:function:kennelCreate/invocations
         responses:
           default:
             statusCode: "200"
@@ -123,6 +139,8 @@ paths:
               "body" : $input.body
             }
     delete:
+      security:
+        - AWSapiKey: []
       tags:
       - kennel
       summary: Delete kennel
@@ -143,12 +161,10 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Kennel not found
-      security:
-      - AWSapiKey: []
       x-amazon-apigateway-integration:
         passthroughBehavior: when_no_match
         httpMethod: POST
-        uri: MASKED
+        uri: arn:aws:apigateway:us-east-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-2:096378249572:function:kennelDelete/invocations
         responses:
           default:
             statusCode: "200"
@@ -161,60 +177,14 @@ paths:
               "kennel_id" : "$input.params('kennel_id')"
             }
   /kennel/agent:
-    get:
-      tags:
-      - agent
-      summary: Agent story
-      description: retrieve an agent's history and metahistory
-      operationId: agentStory
-      parameters:
-      - name: kennel_id
-        in: query
-        description: id of application kennel to operate on
-        required: true
-        style: form
-        explode: true
-        schema:
-          type: string
-      - name: agent_id
-        in: query
-        description: id of particular agent
-        required: true
-        style: form
-        explode: true
-        schema:
-          type: string
-      responses:
-        "200":
-          description: Success - Agent story retreieved
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AgentResponse'
-      security:
-      - AWSapiKey: []
-      x-amazon-apigateway-integration:
-        passthroughBehavior: when_no_match
-        httpMethod: POST
-        uri: MASKED
-        responses:
-          default:
-            statusCode: "200"
-        type: aws
-        parameters:
-          agent_id: $input.params('agent_id')
-          kennel_id: $input.params('kennel_id')
-        requestTemplates:
-          application/json: |-
-            {
-              "agent_id" : "$input.params('agent_id')",
-              "kennel_id" : "$input.params('kennel_id')"
-            }
     post:
+      security:
+        - AWSapiKey: []
       tags:
       - agent
       summary: Agent invoke
-      description: post an input (with optional learning modes instinct and label) to agent to evoke its output
+      description: post an input (with optional learning modes instinct and label)
+        to agent to evoke its output
       operationId: agentInvoke
       requestBody:
         description: to invoke an Agent to get output
@@ -222,6 +192,42 @@ paths:
           application/json:
             schema:
               $ref: '#/components/schemas/InvokeAgent'
+            examples:
+              Basic Clam:
+                value:
+                  kennel_id: v0dev/TEST-BedOfClams
+                  agent_id: 1st of Clams
+                  INPUT: "000"
+                  LABEL: "0"
+                  INSTINCTS: true
+                  control:
+                    CN: false
+                    CP: false
+                    US: true
+                    neuron:
+                      DD: true
+                      Hamming: true
+                      Default: true
+              Netbox Device Discovery:
+                value:
+                  kennel_id: v0dev/TEST-Netbox_DeviceDiscovery
+                  agent_id: 1st NB DD
+                  INPUT: "000000001100000001110000001010"
+                  LABEL: "0000000100"
+                  INSTINCTS: false
+                  control:
+                    CN: false
+                    CP: false
+                    US: true
+                    neuron:
+                      DD: true
+                      Hamming: true
+                      Default: true
+              Request Agent's History:
+                value:
+                  kennel_id: v0dev/TEST-BedOfClams
+                  agent_id: 1st of Clams
+                  request: story
         required: true
       responses:
         "200":
@@ -230,12 +236,19 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AgentResponse'
-      security:
-      - AWSapiKey: []
+              examples:
+                Basic Clam Agent:
+                  value:
+                    state: "2"
+                    story: "0"
+                Netbox Device Discovery Agent:
+                  value:
+                    state: "43"
+                    story: "0000000100"
       x-amazon-apigateway-integration:
         passthroughBehavior: when_no_match
         httpMethod: POST
-        uri: MASKED
+        uri: arn:aws:apigateway:us-east-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-2:096378249572:function:agentInvoke/invocations
         responses:
           default:
             statusCode: "200"
@@ -248,6 +261,8 @@ paths:
               "body" : $input.body
             }
     delete:
+      security:
+        - AWSapiKey: []
       tags:
       - agent
       summary: Agent delete
@@ -276,12 +291,10 @@ paths:
           description: Invalid ID supplied
         "404":
           description: Agent not found
-      security:
-      - AWSapiKey: []
       x-amazon-apigateway-integration:
         passthroughBehavior: when_no_match
         httpMethod: POST
-        uri: MASKED
+        uri: arn:aws:apigateway:us-east-2:lambda:path/2015-03-31/functions/arn:aws:lambda:us-east-2:096378249572:function:agentDelete/invocations
         responses:
           default:
             statusCode: "200"
@@ -322,7 +335,8 @@ components:
       properties:
         kennel_name:
           type: string
-          description: "name your collection of Agents, possible after their/your application"
+          description: "name your collection of Agents, possible after their/your\
+            \ application"
         arch_URL:
           type: string
           description: name or link to arch file in repo github.com/aolabsai/archs
@@ -331,18 +345,6 @@ components:
         permissions:
           type: string
           description: coming soon
-      x-disabled-for-amazon-gateway:
-        examples:
-          Basic Clam Kennel:
-            kennel_name: TEST-Clamologist
-            arch_URL: https://github.com/aolabsai/archs/blob/main/Architectures/basic_clam.py
-            description: "the simplest, atomic arch reference design, our hello, world"
-            permissions: free and open as the sea!
-          Netbox Device Discovery:
-            kennel_name: TEST-Netbox_DeviceDiscovery
-            arch_URL: https://raw.githubusercontent.com/aolabsai/archs/main/Architectures/netbox-device_discovery.py
-            description: "a 30-10-neuron Agent that predicts roles of devices on Netbox, eg. https://demo.netbox.dev/dcim/devices/"
-            permissions: open
     AgentResponse:
       type: object
       properties:
@@ -351,15 +353,8 @@ components:
           description: state counter of Agent
         story:
           type: string
-          description: OUTPUT response of Agent to INPUT (will force-match LABEL if provided)
-      x-disabled-for-amazon-gateway:
-        examples:
-          Basic Clam Agent:
-            state: "2"
-            story: "0"
-          Netbox Device Discovery Agent:
-            state: "43"
-            story: "0000000100"
+          description: OUTPUT response of Agent to INPUT (will force-match LABEL if
+            provided)
     InvokeAgent:
       type: object
       properties:
@@ -371,75 +366,50 @@ components:
           description: locally unique id matching user or customer id
         INPUT:
           type: string
-          description: binary INPUT to Agent; number of binary digits is specified by Agent Arch I neurons
+          description: binary INPUT to Agent; number of binary digits is specified
+            by Agent Arch I neurons
         LABEL:
           type: string
-          description: "OPTIONAL-- binary LABEL to Agent; if provided, Agent output will match LABEL and it will learn that input<>output mapping; number of binary digits is specified by Agent Arch Z neurons"
+          description: "OPTIONAL-- binary LABEL to Agent; if provided, Agent output\
+            \ will match LABEL and it will learn that input<>output mapping; number\
+            \ of binary digits is specified by Agent Arch Z neurons"
         INSTINCTS:
           type: boolean
-          description: OPTIONAL-- activates learning by instinct triggers specified in Agent Arch C neurons
+          description: OPTIONAL-- activates learning by instinct triggers specified
+            in Agent Arch C neurons
         control:
-          $ref: '#/components/schemas/InvokeAgent_control'
-      x-disabled-for-amazon-gateway:
-        examples:
-          Basic Clam:
-            kennel_id: v0dev/TEST-BedOfClams
-            agent_id: 1st of Clams
-            INPUT: "000"
-            LABEL: "0"
-            INSTINCTS: true
-            control:
-              CN: false
-              CP: false
-              US: true
-              neuron:
-                DD: true
-                Hamming: true
-                Default: true
-          Netbox Device Discovery:
-            kennel_id: v0dev/TEST-Netbox_DeviceDiscovery
-            agent_id: 1st NB DD
-            INPUT: "000000001100000001110000001010"
-            LABEL: "0000000100"
-            INSTINCTS: false
-            control:
-              CN: false
-              CP: false
-              US: true
-              neuron:
-                DD: true
-                Hamming: true
-                Default: true
-    InvokeAgent_control_neuron:
-      type: object
-      properties:
-        DD:
-          type: boolean
-          description: neuron look-up happens 1st according to discrimination distance (treating the lookup table 1-D weights)
-        Hamming:
-          type: boolean
-          description: neuron look-up happens 2nd according to Hamming distance
-        Default:
-          type: boolean
-          description: "if neither DD or Hamming converge or are disabled, neuron will default to random binary response"
-      description: neuron-level learning settings
-    InvokeAgent_control:
-      type: object
-      properties:
-        CN:
-          type: boolean
-          description: forces a Negative (painful) learning event
-        CP:
-          type: boolean
-          description: forces a Positive (pleasurable) learning event
-        US:
-          type: boolean
-          description: "Agents learn sequenced info by default, so set as True if data stream is UnSequenced and needs a reset state between each data input"
-        neuron:
-          $ref: '#/components/schemas/InvokeAgent_control_neuron'
-      description: ALL OPTIONAL-- parameters for fine-tuned control
+          type: object
+          properties:
+            CN:
+              type: boolean
+              description: forces a Negative (painful) learning event
+            CP:
+              type: boolean
+              description: forces a Positive (pleasurable) learning event
+            US:
+              type: boolean
+              description: "Agents learn sequenced info by default, so set as True\
+                \ if data stream is UnSequenced and needs a reset state between each\
+                \ data input"
+            neuron:
+              type: object
+              properties:
+                DD:
+                  type: boolean
+                  description: neuron look-up happens 1st according to discrimination
+                    distance (treating the lookup table 1-D weights)
+                Hamming:
+                  type: boolean
+                  description: neuron look-up happens 2nd according to Hamming distance
+                Default:
+                  type: boolean
+                  description: "if neither DD or Hamming converge or are disabled,\
+                    \ neuron will default to random binary response"
+              description: neuron-level learning settings
+          description: ALL OPTIONAL-- parameters for fine-tuned control
   securitySchemes:
     AWSapiKey:
       type: apiKey
       name: X-API-KEY
       in: header
+x-aws-api-id: 7svo9dnzu4
