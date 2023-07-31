@@ -116,7 +116,7 @@ with st.expander("About & Context", expanded=True):
     with right_big_top:
         st.markdown("""
         ### Did you know that :blue[clams] can be trained like dogs and other animals? \n
-        They can learn to associate outputs, opening or closing, to different input patterns. For instance, clams in the captivity can learn to remain open around shadows [[source](https://dantheclamman.blog/2019/06/02/thoughts-of-a-clam/#:~:text=When%20a%20certain,do%20my%20work.)].\n
+        They can learn to associate outputs, opening or closing, to different input patterns. For instance, clams in captivity can learn to remain open around shadows [[source](https://dantheclamman.blog/2019/06/02/thoughts-of-a-clam/#:~:text=When%20a%20certain,do%20my%20work.)].\n
         This intuitive type of cognition, so obvious in animals but so far neglected in AI, has 3 main advantages that deep learning lacks: \n
         * Continous learning:  no gap between training and inference \n
         * Fully transparency: learned behavior can be traced back to training history or how its been conditioned\n
