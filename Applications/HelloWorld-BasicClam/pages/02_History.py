@@ -126,7 +126,7 @@ if Agent is not None:
         metastory = Agent_View_Local.metastory[  0:state , np.asarray([0, 1, 2, 3, 4, 5, 6, 7, 10])].astype(str)
 
         only_experience_states = np.arange(0, Agent_View_Local.metastory.shape[0], 2)
-        metastory = metastory[ only_experience_states, :]
+        metastory = metastory[ only_experience_states-1, :]
          
         col1, col2 = st.columns([1.5, 3])
     
