@@ -114,7 +114,7 @@ class Arch(object):
         self.datamatrix[4, self.C[0][2]] = "C- pain signal"
         #self.datamatrix[4, self.C[0][3]] the default instinct control neuron
         def c0_instinct_rule(INPUT, Agent):
-            if INPUT[0] == 1    and    Agent.story[ Agent.state-1,  Agent.self.Z__flat[0]] == 1 :        # self.Z__flat[0] needs to be adjusted as per the agent, which output the designer wants the agent to repeat while learning postively or negatively
+            if INPUT[0] == 1    and    Agent.story[ Agent.state-1,  Agent.arch.Z__flat[0]] == 1 :        # self.Z__flat[0] needs to be adjusted as per the agent, which output the designer wants the agent to repeat while learning postively or negatively
                 instinct_response = [1, "c0 instinct triggered"]    
             else:
                 instinct_response = [0, "c0 pass"]    
