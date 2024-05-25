@@ -90,7 +90,7 @@ def add_netbox():
             manufacturers[d.device_type.manufacturer.id] = d.device_type.manufacturer.__str__()
             device_types[d.device_type.id] = d.device_type.__str__()
             sites[d.site.id] = d.site.__str__()
-            roles[d.device_role.id] = d.device_role.__str__()
+            roles[d.role.id] = d.role.__str__()
     except pynetbox.RequestError as e:
         devices = []
         st.session_state.account_added = False
