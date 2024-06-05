@@ -33,7 +33,7 @@ def Batch_New_Devices_Callback():
         
         # Calculate results
         st.session_state.predicted_roles += [int(response, 2)]
-        expected = d.device_role.id
+        expected = d.role.id
         if expected == int(response, 2):
             correct_count += 1
         elif st.session_state.predicted_roles[i] not in roles:
@@ -103,7 +103,7 @@ with left_big:
                 devices[i, 4] = st.session_state.predicted_roles_str[i]
             else: # the prediction hasn't been run yet, no results to display
                 devices[i, 4] = ""
-            devices[i, 5] = roles[d.device_role.id]
+            devices[i, 5] = roles[d.role.id]
         
         devices_df = pd.DataFrame( devices, columns=['Name', 'Manufacturer', 'Site', 'Type', 'PREDICTED ROLE', 'EXPECTED ROLE'])
 
