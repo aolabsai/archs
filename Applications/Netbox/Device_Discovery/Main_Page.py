@@ -126,7 +126,7 @@ def train_agents(deployment):
     prog_bar = st.progress(0, text="Training Progress")
     for d in train_devices_in:
         INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
-        LABEL = format(d.device_role.id, '010b')
+        LABEL = format(d.role.id, '010b')
 
         # call Agent via API
         response = agent_api_call(st.session_state.agent_id_field, INPUT, label=LABEL, deployment=deployment)
