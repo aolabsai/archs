@@ -240,7 +240,7 @@ class Arch(object):
 ###############################################################################
 
 
-# arch = Arch(arch_i, arch_z, arch_c, connector_function, description)
+arch = Arch(arch_i, arch_z, arch_c, connector_function, description)
 
 # if you added extra C neurons beyond the 4 default, then after creating the arch instance, program the C neuron like below:
     # arch.datamatrix[4, arch.C[1]]= "define a instinct new_function, like ln 92-98"
