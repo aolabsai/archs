@@ -2,7 +2,7 @@
 
 We're building the next layer in the AI stack, AI continuously trained to maintain itself as a referent in the learned local context, for awareness as code. We believe this is what's missing from our conception of AI today, the lack of which leads to hallucinations and the blackbox problem.
 
-At these earliest of stages our AI is at a very basic level of self-association, comparable to simplest of animals. It's not ChadGPT or anywhere near human levels, but it has qualities that LLMs and other status quo AI lack, and as a community we have a clear bottom-up path to building more cognitively complicated agents following the evolution and phylogenetics of intelligence.
+At these earliest of stages our AI is at a very basic level of self-association, comparable to simplest of animals. It's not ChatGPT or anywhere near human levels, but it has qualities that LLMs and other status quo AI lack, and as a community we have a clear bottom-up path to building more cognitively complicated agents following the evolution and phylogenetics of intelligence.
 
 To get started, you can fork a reference design (the numbered files in the *archs repo* root directory) to make a new Arch for your application and use it with our Agents-as-a-Service API to create and use persistent Agents, [here’s a guide](https://docs.aolabs.ai/docs/arch).
 
