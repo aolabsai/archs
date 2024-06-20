@@ -117,7 +117,16 @@ class Arch(object):
 
 
     ## Connector functions follow
-    
+    #     
+    # Note: Neurons are hierarchically grouped as follows: 
+    # ----- Set: fixed; major set of neurons, I-input, Q-inter, Z-output, or C-control only
+    # --------- Channel: groups of neurons that share a similar function (i.e. 10 neurons for food or for a name ID)
+    # -------------- Group: coming soon; subset of channels of neurons
+    #
+    # Neurons can be connected in a number of ways across groups and channels. Below are some connector_functions for your convenience.
+    # 
+    # You can also manually specifiy the connections for your particular arch directly in the datamatrix, or write your own connector_function to do so.
+
         if self.connector_function=="full_conn":
             """Fully connect the neurons-- Q to all I and Q; Z to all Q and Z"""
         
@@ -145,7 +154,7 @@ class Arch(object):
     
     
         if self.connector_function == "forward_full_conn":    
-            """Fully connect the neurons input-wise-- Q channel to *all* I and itsel; Z channel to all Q and itself"""
+            """Fully connect the neurons input-wise-- Q channel to *all* I and itself; Z channel to all Q and itself"""
         
             for Channel in self.Q:
                 for n in Channel:
