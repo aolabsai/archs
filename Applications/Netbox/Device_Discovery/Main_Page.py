@@ -18,7 +18,7 @@ def agent_api_call(agent_id, input_data, label=None, deployment="Local"):
     if deployment == "API":
         url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel/agent"
         payload = {
-            "kennel_id": "v0dev/TEST-Netbox_DeviceDiscovery",
+            "kennel_id": "v0.1.2dev/TEST-Netbox_DeviceDiscovery",
             "agent_id": agent_id,
             "INPUT": input_data,
             "control": {
