@@ -23,8 +23,8 @@ import requests
 url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel"
 payload = {
     "kennel_name": "Test Check by Kushagra",  # give it a unique name
-    "arch_URL": "https://raw.githubusercontent.com/aolabsai/archs/main/2_netbox-device_discovery.py",
-    "description": "the simplest, atomic arch reference design, our hello, world",
+    "arch_URL": "https://raw.githubusercontent.com/Kushagra7777/archs/main/test_arch_by_kush.py",
+    "description": "its a custom test arch",
     "permissions": "free and open as the sea!"
 }
 headers = {
