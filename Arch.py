@@ -43,7 +43,7 @@ class Arch(object):
         self.i = arch_i
         self.q = self.i.copy()
         self.z = arch_z
-        self.c = [4]+arch_c
+        self.c = [3]+arch_c
         self.connector_function = connector_function
         self.connector_parameters = connector_parameters
         self.description = description
@@ -54,7 +54,7 @@ class Arch(object):
         # I - Input neurons: 0 or 1 depending on fixed ENV decoding
         # Q - State or interneurons: 0 or 1 depending on learned lookup tabled comproised of connected neurons
         # Z - Output neurons: also learning binary neurons like Q, except Z actuates Agent in enviroment
-        # C - Control neurons: 0 or 1 depending on designer defined trigger or method like instincts to activate learning; a defined condition on input which triggers the C neuron
+        # C - Control neurons: 0 or 1 depending on designer defined label or trigger like instincts to activate learning
 
         # Creating nids in Channels in Sets
         si = 0     # sets, i.e. category of neurons corresponding to major type, i.g. I or Z or C
@@ -83,7 +83,7 @@ class Arch(object):
         self.QZ__flat = np.concatenate((self.Q__flat, self.Z__flat))        # remove flat from ao_core later for consistency
         
         self.C__flat_command = np.array(self.C[0])     # the first C channel always contains the command neurons which are default to each Agent
-        self.C__flat_pleasure= np.array([self.C[0][0], self.C[0][1], self.C[0][3]])
+        self.C__flat_pleasure= np.array([self.C[0][0], self.C[0][1]])
         self.C__flat_pain    = np.array([self.C[0][2]])
         
         # Defining Neuron metadata -- the connections of neurons (i.e. which neurons consititue each others' lookup tables)
@@ -105,16 +105,6 @@ class Arch(object):
         self.datamatrix[4, self.C[0][0]] = "Default if label"
         self.datamatrix[4, self.C[0][1]] = "C+ pleasure signal"
         self.datamatrix[4, self.C[0][2]] = "C- pain signal"
-        #self.datamatrix[4, self.C[0][3]] the default instinct control neuron
-        def c0_instinct_rule(INPUT, Agent):
-            if INPUT[0] == 1    and    Agent.story[ Agent.state-1,  Agent.self.Z__flat[0]] == 1 :        # self.Z__flat[0] needs to be adjusted as per the agent, which output the designer wants the agent to repeat while learning postively or negatively
-                instinct_response = [1, "c0 instinct triggered"]    
-            else:
-                instinct_response = [0, "c0 pass"]    
-            return instinct_response            
-        self.datamatrix[4, self.C[0][3]] = c0_instinct_rule        
-
-
 
     ## Connector functions follow
     #     
