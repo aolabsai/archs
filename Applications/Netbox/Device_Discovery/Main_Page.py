@@ -120,6 +120,7 @@ def train_agents(deployment):
     test_devices_in = batch[0:test_size]
     train_devices_in = batch[test_size:]
     st.session_state.test_devices_in = test_devices_in
+    st.session_state.train_devices_in = train_devices_in
     st.session_state.train_size = len(train_devices_in)
     
     prog = 0
