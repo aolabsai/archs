@@ -54,7 +54,7 @@ def string2lookup(bi_text):
 
 
 # Streamlit-powered frontend
-st.title('Agent history page')
+st.title('Agent History')
 if "side_bar_content" in st.session_state: exec(st.session_state.side_bar_content)
 else:
     with st.sidebar:
@@ -64,7 +64,7 @@ left_big, right_big = st.columns([0.7, 0.3])
 
 
 if 'trained' not in st.session_state:
-    st.text("You have to connect your Netbox account and an Agent first.")
+    st.text("You have to connect your NetBox account and an Agent first.")
 
 else:
 
@@ -87,7 +87,7 @@ else:
                 train_devices_table[i, 3] = d.device_type.__str__()
             st.session_state.train_devices_table = pd.DataFrame(train_devices_table, columns=['Name', 'Manufacturer', 'Site', 'Type'])
             
-            st.markdown("Given below is the label history table.")
+            st.markdown("Below are the labels associated with the Agent's training data, its memory.")
             
             st.write(st.session_state.train_devices_table)
             st.write("")
@@ -100,11 +100,17 @@ else:
 
     with right_big:
         agent_id = st.session_state.agent_id
-        
-        # Get the lookup table and the array of strings from the binary text
-        bi_text = API_response(agent_id=agent_id)  # Assuming you have a function to get the binary text response
-        table = string2lookup(bi_text)
 
+        if st.session_state.deployment == "API":            
+            # Get the lookup table and the array of strings from the binary text
+            bi_text = API_response(agent_id=agent_id)  # Assuming you have a function to get the binary text response
+            table = string2lookup(bi_text)
+        
+        elif st.session_state.deployment == "Local": 
+            # Get the lookup table from a local agent
+            agent = st.session_state["Local_Agents"][agent_id]
+            table = agent.story[ 0:agent.state, 0:agent.arch.n_total]
+            
         # Create a DataFrame from the lookup table
         df = pd.DataFrame(table)
 
@@ -131,6 +137,8 @@ else:
 
         # Update the DataFrame with new column names
         df.columns = column_names[:df.shape[1]]
+
+        st.write("The Agent stores this memory as a binary lookup table encoded according to its Arch (in this case 10 binary neurons are used to encode the IDs of each category or input channel).")
 
         # Add sliders to control the number of rows and columns displayed
         num_rows = st.slider("Number of rows to display", min_value=1, max_value=df.shape[0], value=7)
