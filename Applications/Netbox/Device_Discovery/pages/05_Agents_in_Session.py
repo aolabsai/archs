@@ -10,6 +10,7 @@ Purpose: Display Agents connected to Session
 import streamlit as st
 import pandas as pd
 
+
 # streamlit frontend
 st.title('View All Your Agents')
 if "side_bar_content" in st.session_state: exec(st.session_state.side_bar_content)
@@ -17,7 +18,8 @@ else:
     with st.sidebar:
         st.write("*Go to the Main Page to start*")
 st.write("*View all of the Agents you've called during this browser session.*")
-
+st.write("")
+st.write("")
 if "Agents" in st.session_state:
     if st.session_state.Agents == {}: st.text("You have not created any Agents yet.")
     st.dataframe( pd.DataFrame.from_dict( st.session_state.Agents ) )
