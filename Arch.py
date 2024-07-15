@@ -2,46 +2,39 @@
 """
 // aolabs.ai software >ao_core/Arch.py (C) 2023 Animo Omnis Corporation. All Rights Reserved.
 
-Open source; temporarily under the MIT liscence as per the README.md in parent repository; final lisence and more info TBD at aolabs.ai/strategy.
+Open source; temporarily under the MIT license as per the README.md in parent repository; final license and more info TBD at aolabs.ai.
 
 Thank you for your curiosity!
 """
 
-## // About :: https://docs.aolabs.ai/docs/arch-config
+## // About :: https://docs.aolabs.ai/docs/arch
 #
-# This class defines the Agent Architecture logic used to configure Agents, comprised of 2 components: 
+# This class defines the Agent ARCHitecture logic used to configure Agents, comprised of 2 components: 
 #    1) how many binary neurons to encode your input-output assocations (required),
 #    2) How those neurons are connected (optional, more advanced-- best to start with the default of fully-connected network of neurons and them trim down)
 #
-# For interactive visual representation of Archs: https://miro.com/app/board/uXjVM_kESvI=/?share_link_id=72701488535
+# There are currently 3 archs you can use as reference designs for your own configuration-- a basic clam, an MNIST classifier, and a NetBox device discovery classifier (find them in the root directory of this repo).
+#
+# For an interactive visual representation of Archs to help design your own, visit: https://miro.com/app/board/uXjVM_kESvI=/?share_link_id=72701488535
 #
 # We eagerly welcome contributors who relate to these ideas. :)
 #
 #
+###############################################################################
+#
+# arch = Arch(arch_i, arch_z, arch_c, connector_function, description)
+#
+# if you added extra C neurons beyond the 4 default, then after creating the arch instance, program the C neuron like below:
+#    # arch.datamatrix[4, arch.C[1]]= "define a instinct new_function, like ln 92-98"
+#    # also you may wish to change how the connections of the new C neuron: arch.datamatrix[3, arch.C[1]]= connections of new C channel
+#
 ##############################################################################
-# Reference Archs for Testing
 
-# description = "Basic Clam"
-# arch_i = [1, 1, 1]     # corresponding to Food, Chemical-A, Chemical-B (present=1/not=0)
-# arch_z = [1]           # corresponding to Open=1/Close=0
-# arch_c = []            # 4 c neurons are included in the default first channel-- 0-label, 1-force_positive, 2-force_negative, 3-default pleasure instinct triggered when I__flat[0]=1 and Z of previous step Z__flat[0]=1
-# connector_function = "full_conn"
-
-
-description = "Netbox device type relational autocomplete (10 binary digits per field to encode ids)"
-arch_i = [10, 10, 10]
-arch_z = [10]
-arch_c = []
-connector_function = "forward_full_conn"
-
-
-##############################################################################
 # Arch Class
 
 # 3rd Party Modules
 import numpy as np
 import random as rn
-
 
 class Arch(object):
     """Arch constructor class."""
@@ -50,7 +43,7 @@ class Arch(object):
         self.i = arch_i
         self.q = self.i.copy()
         self.z = arch_z
-        self.c = [4]+arch_c
+        self.c = [3]+arch_c
         self.connector_function = connector_function
         self.connector_parameters = connector_parameters
         self.description = description
@@ -61,7 +54,7 @@ class Arch(object):
         # I - Input neurons: 0 or 1 depending on fixed ENV decoding
         # Q - State or interneurons: 0 or 1 depending on learned lookup tabled comproised of connected neurons
         # Z - Output neurons: also learning binary neurons like Q, except Z actuates Agent in enviroment
-        # C - Control neurons: 0 or 1 depending on designer defined trigger or method like instincts to activate learning; a defined condition on input which triggers the C neuron
+        # C - Control neurons: 0 or 1 depending on designer defined label or trigger like instincts to activate learning
 
         # Creating nids in Channels in Sets
         si = 0     # sets, i.e. category of neurons corresponding to major type, i.g. I or Z or C
@@ -90,7 +83,7 @@ class Arch(object):
         self.QZ__flat = np.concatenate((self.Q__flat, self.Z__flat))        # remove flat from ao_core later for consistency
         
         self.C__flat_command = np.array(self.C[0])     # the first C channel always contains the command neurons which are default to each Agent
-        self.C__flat_pleasure= np.array([self.C[0][0], self.C[0][1], self.C[0][3]])
+        self.C__flat_pleasure= np.array([self.C[0][0], self.C[0][1]])
         self.C__flat_pain    = np.array([self.C[0][2]])
         
         # Defining Neuron metadata -- the connections of neurons (i.e. which neurons consititue each others' lookup tables)
@@ -112,19 +105,18 @@ class Arch(object):
         self.datamatrix[4, self.C[0][0]] = "Default if label"
         self.datamatrix[4, self.C[0][1]] = "C+ pleasure signal"
         self.datamatrix[4, self.C[0][2]] = "C- pain signal"
-        #self.datamatrix[4, self.C[0][3]] the default instinct control neuron
-        def c0_instinct_rule(INPUT, Agent):
-            if INPUT[0] == 1    and    Agent.story[ Agent.state-1,  Agent.self.Z__flat[0]] == 1 :        # self.Z__flat[0] needs to be adjusted as per the agent, which output the designer wants the agent to repeat while learning postively or negatively
-                instinct_response = [1, "c0 instinct triggered"]    
-            else:
-                instinct_response = [0, "c0 pass"]    
-            return instinct_response            
-        self.datamatrix[4, self.C[0][3]] = c0_instinct_rule        
-
-
 
     ## Connector functions follow
-    
+    #     
+    # Note: Neurons are hierarchically grouped as follows: 
+    # ----- Set: fixed; major set of neurons, I-input, Q-inter, Z-output, or C-control only
+    # --------- Channel: groups of neurons that share a similar function (i.e. 10 neurons for food or for a name ID)
+    # -------------- Group: coming soon; subset of channels of neurons
+    #
+    # Neurons can be connected in a number of ways across groups and channels. Below are some connector_functions for your convenience.
+    # 
+    # You can also manually specifiy the connections for your particular arch directly in the datamatrix, or write your own connector_function to do so.
+
         if self.connector_function=="full_conn":
             """Fully connect the neurons-- Q to all I and Q; Z to all Q and Z"""
         
@@ -152,7 +144,7 @@ class Arch(object):
     
     
         if self.connector_function == "forward_full_conn":    
-            """Fully connect the neurons input-wise-- Q channel to *all* I and itsel; Z channel to all Q and itself"""
+            """Fully connect the neurons input-wise-- Q channel to *all* I and itself; Z channel to all Q and itself"""
         
             for Channel in self.Q:
                 for n in Channel:
@@ -237,11 +229,3 @@ class Arch(object):
             
 
             
-###############################################################################
-
-
-# arch = Arch(arch_i, arch_z, arch_c, connector_function, description)
-
-# if you added extra C neurons beyond the 4 default, then after creating the arch instance, program the C neuron like below:
-    # arch.datamatrix[4, arch.C[1]]= "define a instinct new_function, like ln 92-98"
-    # also you may wish to change how the connections of the new C neuron: arch.datamatrix[3, arch.C[1]]= connections of new C channel

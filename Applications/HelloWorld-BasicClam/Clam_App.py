@@ -12,66 +12,28 @@ import requests
 
 
 # Returns json, result stored in json as Agent's 'story'
-def agent_api_call(agent_id, input_dat, label=None, deployment="Local"):
+def agent_api_call(agent_id, input_dat, label=None):
+    url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel/agent"
 
-    if deployment == "API":
-        url = "https://7svo9dnzu4.execute-api.us-east-2.amazonaws.com/v0dev/kennel/agent"
-    
-        payload = {
-            "kennel_id": "v0dev/TEST-BedOfClams",
-            "agent_id": agent_id,
-            "INPUT": input_dat,
-            "control": {
-                "US": True
-            }
+    payload = {
+        "kennel_id": "v0.1.2dev/TEST-Clamologist",
+        "agent_id": agent_id,
+        "INPUT": input_dat,
+        "control": {
+            "US": True
         }
-        if label != None:
-            payload["LABEL"] = label
-    
-        headers = {
-            "accept": "application/json",
-            "content-type": "application/json",
-            "X-API-KEY": st.secrets["aolabs_api_key"]
-        }
-    
-        response = requests.post(url, json=payload, headers=headers)
-        print(response)    
-        response = response.json()['story']  # we can print the HTTP response here, too
-        return response
+    }
+    if label != None:
+        payload["LABEL"] = label
 
-    if deployment == "Local":
-        if label == None:
-            label = []
-        if agent_id not in st.session_state['Local_Agents']:
-            agent = st.session_state.Local_Core( st.session_state.Local_Arch )
-            st.session_state["Local_Agents"][agent_id] = agent
-        else:
-            agent = st.session_state['Local_Agents'][agent_id]
-        agent.reset_state()
-        agent.next_state( list(input_data), list(label), unsequenced=True)
-        response = agent.story[ agent.state-1, agent.arch.Z__flat ]
-        response = "".join(list(response.astype(str)))
-        print("from api call func" + response)
-        return response
+    headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "X-API-KEY": "weBuildBottomUpAGIsForAll"
+    }
 
-if "Local_Agents" not in st.session_state:
-    # to construct and store Local Agents as needed
-    st.session_state.Local_Agents = {}
-
-    # preparing Arch Netbox Device Discovery locally 
-    from Arch import Arch
-    arch = Arch([1, 1, 1], [1], [], "full_conn", "Clam Agent created locally!")
-    st.session_state.Local_Arch = arch
-    
-    # retrieving Agent class locally from Core
-    from github import Github, Auth    
-    github_auth = Auth.Token(st.secrets["aolabs_github_auth"])
-    github_client = Github(auth=github_auth)
-    ao_core = github_client.get_repo("aolabsai/ao_core")
-    content = ao_core.get_contents("ao_core/ao_core.py")
-    exec(content.decoded_content, globals())
-    st.session_state.Local_Core = Agent
-
+    response = requests.post(url, json=payload, headers=headers)
+    return response
 
 st.set_page_config(
     page_title="AO Labs Demo App",
@@ -81,92 +43,91 @@ st.set_page_config(
     menu_items={
         'Get Help': "mailto:ali@aolabs.ai",
         'Report a bug': "mailto:ali@aolabs.ai",
-        'About': "This is a demo of our AI features. Check out www.aolabs.ai and www.docs.aolabs.ai for more. Thank you!"
+        'About': "This is a demo of our AI features. Learn more at www.aolabs.ai and www.docs.aolabs.ai."
     }
 )
 
 # App Front End
-st.title('AO Labs v0.1.0 Clam Demo')
-st.image("https://i.imgur.com/cTHLQYL.png")
-st.markdown("*Note: This app is not yet a standalone experience; please visit [this guide for more context](https://docs.google.com/document/d/1cUmTXsf7bCIMGKm3RHn001Qya-tZcFTvgCPj4Ynu2_M/edit).*")
+st.title('Hello, World! A Clam-Level AGI')
+st.write("### *a toy problem demo by [aolabs.ai](https://www.aolabs.ai/)* -- [refer to this guide](https://docs.aolabs.ai/docs/basic-clam)")
+
 st.write("")
 st.write("")
 st.write("")
 
-st.write("First, name your Clam Agent.")
-st.write(" Agents maintain persistant state and are auto-provisioned through our API (or you can also try a version of this demo with the Agent loaded in the browser session.")
-def New_Agent(deployment):
-    st.session_state.agent_id = agent
-    st.session_state.agent_results = np.zeros( (100,  5), dtype='O')
-    st.session_state.agent_trials = 0
+left_big_bottom, right_big_bottom = st.columns([0.6, 0.4])
 
-    Agent = {
-        'deployment': deployment,
-        'trials': str(0),
-        # 'tested (bulk)': str(st.session_state.tested)+" - "+str(test_size),
-        # 'accuracy (bulk)': "",
-        # 'no guesses (bulk)': "",
-        # 'recs (autocomplete)': str(0),
-        # 'mistakes (autocomplete)': str(0),
-        }
-    st.session_state.Agents[ agent ] = Agent
-       
-agent = st.text_input("Create a Local Agent", value="1st of Clams - local", on_change=New_Agent, args=("Local"))
-agent = st.text_input("Create an Agent via our API", value='1st of Clams - api', on_change=New_Agent, args=("API"))
-if agent == '1st of Clams' and 'agent_id' not in st.session_state: New_Agent()    
-st.write("The current Agent is::::", agent)
-st.write("")
-st.markdown('#')
-st.markdown('##')
+with right_big_bottom:
 
-st.write("STEP 0) Activate learning:")
-instincts_ONOFF = st.checkbox('Instincts On')
-labels_ONOFF = st.checkbox('Labels On')
-if labels_ONOFF & instincts_ONOFF is True: st.write('Note: the presence of labels overrides any instinctual learning.')
-LABEL = None
-if labels_ONOFF is True:
-    labels_CHOICE = st.radio('Pick one', ['OPEN the Clam', 'CLOSE the Clam'])
-    if labels_CHOICE == 'OPEN the Clam': LABEL = 1
-    if labels_CHOICE == 'CLOSE the Clam': LABEL = 0
-st.write("")
+    st.image("https://i.imgur.com/MjI8OCM.png")
 
-user_INPUT = st.multiselect("STEP 1) Show the Clam this input pattern:", ['FOOD', 'A-CHEMICAL', 'C-CHEMICAL'])
-user_STATES = st.slider('This many times:', 1, 10)
-st.write("")
-st.write("")
+with left_big_bottom:
 
-st.write("STEP 2) Run Trial: "+str(st.session_state.agent_trials))
-if user_STATES == 1:button_text= 'Expose Clam ONCE'
-if user_STATES > 1: button_text= 'Expose Clam '+str(user_STATES)+' times'
+    st.write("First, name your Clam Agent.")
+    st.write(" Agents maintain persistant state and are auto-provisioned through our API; this app is using our [Agent Invoke API call](https://docs.aolabs.ai/reference/agentinvoke); view the [code here](https://github.com/aolabsai/archs/blob/main/Applications/HelloWorld-BasicClam/Clam_App.py).")
+    def New_Agent():
+        st.session_state.agent_id = agent
+        st.session_state.agent_results = np.zeros( (100,  5), dtype='O')
+        st.session_state.agent_trials = 0
+    agent = st.text_input('Agent Name', value='1st of Clams', on_change=New_Agent)
+    if agent == '1st of Clams' and 'agent_id' not in st.session_state: New_Agent()    
+    st.write("*The current Agent is:*", agent)
+    st.write("")
+    st.markdown('#')
+    st.markdown('##')
 
-# Run the Agent Trial
-def run_agent():
+    st.write("STEP 0) Activate learning:")
+    instincts_ONOFF = st.checkbox('Instincts On')
+    labels_ONOFF = st.checkbox('Labels On')
+    if labels_ONOFF & instincts_ONOFF is True: st.write('Note: the presence of labels overrides any instinctual learning.')
+    LABEL = None
+    if labels_ONOFF is True:
+        labels_CHOICE = st.radio('Pick one', ['OPEN the Clam', 'CLOSE the Clam'])
+        if labels_CHOICE == 'OPEN the Clam': LABEL = 1
+        if labels_CHOICE == 'CLOSE the Clam': LABEL = 0
+    st.write("")
 
-    # INPUTS
-    INPUT = [0, 0, 0]
-    if 'FOOD'       in user_INPUT: INPUT[0] = 1
-    if 'A-CHEMICAL' in user_INPUT: INPUT[1] = 1
-    if 'C-CHEMICAL' in user_INPUT: INPUT[2] = 1
-    
-    responses = []
-    for x in np.arange(user_STATES):
-        response= agent_api_call(st.session_state.agent_id, INPUT, label=LABEL)        
-        print(response)
-        print([int(response.json()['story'])])
-        responses += [int(response)]
+    user_INPUT = st.multiselect("STEP 1) Show the Clam this input:", ['FOOD', 'A-CHEMICAL', 'B-CHEMICAL'])
+    user_STATES = st.slider('This many times', 1, 100)
+    st.write("")
+    st.write("")
 
-    # save trial results for dispplaying to enduser    
-    final_totals = sum(responses) / user_STATES * 100
-    if labels_ONOFF == True: Label_Insti = "LABEL"
-    elif instincts_ONOFF == True: Label_Insti = "INSTI"
-    else: Label_Insti ="NONE"
-    st.session_state.agent_results[st.session_state.agent_trials, :] = ["Trial #"+str(st.session_state.agent_trials), INPUT, user_STATES, Label_Insti, str(final_totals)+"%"]
-    
-    st.session_state.agent_trials += 1
+    st.write("STEP 2) Run Trial: "+str(st.session_state.agent_trials))
+    if user_STATES == 1:button_text= 'Expose Clam ONCE'
+    if user_STATES > 1: button_text= 'Expose Clam '+str(user_STATES)+' times'
 
-if user_STATES == 1: button_text= 'Expose Clam ONCE'
-if user_STATES > 1: button_text= 'Expose Clam '+str(user_STATES)+' times'
-st.button(button_text, on_click=run_agent)
+    # Run the Agent Trial
+    def run_agent():
+
+        # INPUTS
+        INPUT = [0, 0, 0]
+        if 'FOOD'       in user_INPUT: INPUT[0] = 1
+        if 'A-CHEMICAL' in user_INPUT: INPUT[1] = 1
+        if 'B-CHEMICAL' in user_INPUT: INPUT[2] = 1
+        
+        responses = []
+        prog_bar = st.progress(0, text="Trial in Progress")
+        for x in np.arange(user_STATES):
+            response= agent_api_call(st.session_state.agent_id, INPUT, label=LABEL)        
+            print(response)
+            print([int(response.json()['story'])])
+            responses += [int(response.json()['story'])]
+
+            prog_bar.progress((float(x)/user_STATES), text='Trial in Progress')
+        prog_bar.progress(1.0, text='Trial Complete')
+
+        # save trial results for dispplaying to enduser    
+        final_totals = sum(responses) / user_STATES * 100
+        if labels_ONOFF == True: Label_Insti = "LABEL"
+        elif instincts_ONOFF == True: Label_Insti = "INSTI"
+        else: Label_Insti ="NONE"
+        st.session_state.agent_results[st.session_state.agent_trials, :] = ["Trial #"+str(st.session_state.agent_trials), INPUT, user_STATES, Label_Insti, str(final_totals)+"%"]    
+        
+        st.session_state.agent_trials += 1
+
+    if user_STATES == 1: button_text= 'Expose Clam ONCE'
+    if user_STATES > 1: button_text= 'Expose Clam '+str(user_STATES)+' times'
+    st.button(button_text, on_click=run_agent)
 
 # Display Trial Log Results
 display_trial = st.session_state.agent_trials-1

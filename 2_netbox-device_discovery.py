@@ -14,6 +14,9 @@ Thank you for your curiosity!
 #
 # For interactive visual representation of this Arch:
 #    https://miro.com/app/board/uXjVM_kESvI=/?share_link_id=72701488535
+#
+# Cutomize and upload this Arch to our API to create Agents: https://docs.aolabs.ai/reference/kennelcreate
+#
 
 
 description = "Netbox device type relational autocomplete (10 binary digits per field to encode ids)"
@@ -21,6 +24,9 @@ arch_i = [10, 10, 10]               # a scaled up Basic Clam, with 3 input chann
 arch_z = [10]                       # 10 neurons in 1 channel to encode device Role IDs
 arch_c = []
 connector_function = "forward_full_conn"
-
 # device mfg, type, and site are stored as strings (names) with associated unique IDs
 # using 10 binary neurons to encode integer IDs means we can encode up to 2^10 = 1048 unique binary values.
+
+# To maintain compatability with our API, do not change the variable name "Arch" or the constructor class "ao.Arch" in the line below (the API is pre-loaded with a version of the Arch class in this repo's main branch, hence "ao.Arch")
+Arch = ao.Arch(arch_i, arch_z, arch_c, connector_function, description)
+
