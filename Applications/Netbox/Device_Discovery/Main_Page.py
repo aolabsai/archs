@@ -34,6 +34,7 @@ def agent_api_call(agent_id, input_data, label=None, deployment="Local"):
         }
         response = requests.post(url, json=payload, headers=headers)
         response = response.json()['story']  # we can print the HTTP response here, too
+        st.session_state.deployment = "API"
         return response
 
     if deployment == "Local":
@@ -48,6 +49,7 @@ def agent_api_call(agent_id, input_data, label=None, deployment="Local"):
         agent.next_state( list(input_data), list(label), unsequenced=True)
         response = agent.story[ agent.state-1, agent.arch.Z__flat ]
         response = "".join(list(response.astype(str)))
+        st.session_state.deployment = "Local"
         return response
 
 # to construct and store Local Agents as needed
