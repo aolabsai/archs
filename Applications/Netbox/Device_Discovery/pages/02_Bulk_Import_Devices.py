@@ -26,16 +26,15 @@ def Batch_New_Devices_Callback():
     for i in range(len(test_devices)):
         d = test_devices[i]
         
-        # Run Agent API
+        # Run Agent API or Local
         INPUT = format(d.device_type.manufacturer.id, '010b') + format(d.device_type.id, '010b') + format(d.site.id, '010b')
-        response = agent_api_call(st.session_state.agent_id, INPUT)
+        response = agent_api_call(st.session_state.agent_id, INPUT, deployment=st.session_state.Agents[ st.session_state.agent_id ]['deployment'])
         print(response)
         
         # Calculate results
-        story = response.json()['story']
-        st.session_state.predicted_roles += [int(story, 2)]
-        expected = d.device_role.id
-        if expected == int(story, 2):
+        st.session_state.predicted_roles += [int(response, 2)]
+        expected = d.role.id
+        if expected == int(response, 2):
             correct_count += 1
         elif st.session_state.predicted_roles[i] not in roles:
             missing_count += 1
@@ -66,7 +65,7 @@ left_big, right_big = st.columns([0.7, 0.3])
 
 with right_big:
     st.image("https://i.imgur.com/m2Aws1v.png")
-    st.markdown("Screenshot from demo.netbox.dev")    
+    st.markdown("*Screenshot from demo.netbox.dev/dcim/devices/import/*")    
     # with st.expander("See Agent's Arch (Configuration)"):
     #     arch_visual_miro_html= """<iframe width="768" height="432" src="https://miro.com/app/live-embed/uXjVM_kESvI=/?moveToViewport=121907,-48157,16256,9923&embedId=323274877415" frameborder="0" scrolling="no" allow="fullscreen; clipboard-read; clipboard-write" allowfullscreen></iframe>"""
     #     st.write(arch_visual_miro_html, unsafe_allow_html=True)
@@ -74,6 +73,7 @@ with right_big:
 with left_big:
 
     st.write("*Conceived as an API solution for the [bulk import new devices page on Netbox](https://demo.netbox.dev/dcim/devices/import/).*")
+    st.write("")
     st.write("")
     st.write("Click the button below to batch-predict the **:red[Roles]** for these new devices.")
     st.write("")
@@ -103,7 +103,7 @@ with left_big:
                 devices[i, 4] = st.session_state.predicted_roles_str[i]
             else: # the prediction hasn't been run yet, no results to display
                 devices[i, 4] = ""
-            devices[i, 5] = roles[d.device_role.id]
+            devices[i, 5] = roles[d.role.id]
         
         devices_df = pd.DataFrame( devices, columns=['Name', 'Manufacturer', 'Site', 'Type', 'PREDICTED ROLE', 'EXPECTED ROLE'])
 

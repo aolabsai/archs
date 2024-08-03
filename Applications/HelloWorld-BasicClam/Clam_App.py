@@ -47,7 +47,6 @@ st.set_page_config(
     }
 )
 
-
 # App Front End
 st.title('Hello, World! A Clam-Level AGI')
 st.write("### *a toy problem demo by [aolabs.ai](https://www.aolabs.ai/)* -- [refer to this guide](https://docs.aolabs.ai/docs/basic-clam)")
