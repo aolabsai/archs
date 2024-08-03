@@ -117,10 +117,8 @@ class Arch(object):
     # 
     # You can also manually specifiy the connections for your particular arch directly in the datamatrix, or write your own connector_function to do so.
 
-        if self.connector_function=="full_conn":
+        if self.connector_function == "full_conn":
             """Fully connect the neurons-- Q to all I and Q; Z to all Q and Z"""
-        
-        #    for Channel in self.I:   # I has no incoming connections; input is supplied ex machina (by the env)
         
             for Channel in self.Q:
                 for n in Channel:
@@ -164,68 +162,92 @@ class Arch(object):
                 for n in Channel:
                     self.datamatrix[3, n] = sorted(self.Q__flat) + sorted(self.Z__flat)
                     
-                self.datamatrix_type = 'forward_full_conn'
-    
-    
-        if self.connector_function == "forward_forward_conn":    
-            """fully connect the neurons forward only-- Q channel to *corresponding* I and itself; Z channel to all Q and itself"""
-        
-            ci = 0
+            self.datamatrix_type = 'forward_full_conn'
+            
+            
+        if self.connector_function == "forward_single_conn":    
+            """Connect the neurons forward-wise, from each corresponding input (I) and neighbor (Q), e.g. Q channel to each individual I and to itself; Z channel to each individual Q and to itself"""
+            
+            ch = 0
             for Channel in self.Q:
                 for n in Channel:
-                    self.datamatrix[1, n] = sorted(self.I[ci])
+                    self.datamatrix[1, n] = sorted(self.I[ch])
                     self.datamatrix[2, n] = sorted(Channel)
                     self.datamatrix[3, n] = sorted(self.C__flat)
                     self.datamatrix[4, n] = n - sum(self.q)
-                ci += 1
-            
+                ch += 1
+                
+            ch = 0
             for Channel in self.Z:
                 for n in Channel:
-                    self.datamatrix[1, n] = sorted(self.Q__flat)
+                    self.datamatrix[1, n] = sorted(self.Q[ch])
                     self.datamatrix[2, n] = sorted(Channel)
                     self.datamatrix[3, n] = sorted(self.C__flat)
                     self.datamatrix[4, n] = n
+                ch += 1
                 
             for Channel in self.C:
                 for n in Channel:
                     self.datamatrix[3, n] = sorted(self.Q__flat) + sorted(self.Z__flat)
                     
-                self.datamatrix_type = 'forward_forward_conn'
+            self.datamatrix_type = 'forward_single_conn'
+            
     
-    
-        if self.connector_function == "rand_conn":
-            """Connect neurons randomly (choose how many random connections per neuron set).
-        
-            Keyword arguments:
-            q_in_conn -- int of random I-input connections for Q neurons
-            q_ne_conn -- int of random Q-neighbor connections for Q neurons
-            z_in_conn -- int of random Q-input connections for Z neurons
-            z_ne_conn -- int of random Z-neighbor connections for Z neurons
-            """    
-            q_in_conn = self.connector_parameters[0]
-            q_ne_conn = self.connector_parameters[1]
-            z_in_conn = self.connector_parameters[2]
-            z_ne_conn = self.connector_parameters[3]
-        
+        if self.connector_function == "nearest_neighbour_conn":    
+            """Define how many neurons you want along axes (ax) and along diagonals (dg) for the connection"""
+            
+            ax = 3
+            dg = 2
+            ch = 0
+            row = 0
+            col = 0
+            total = len(self.Q)
+            dimensions = int(np.sqrt(total))
             for Channel in self.Q:
+                neighbour_indices = nearest_points(row, col, ax, dg, size=(dimensions, dimensions))
+                input_con = sorted(self.I[ch])
+                neigh_con = sorted(Channel)
+                for index in neighbour_indices:
+                    temp_ch = int((dimensions*index[0]) + index[1]) 
+                    input_con = input_con + sorted(self.I[temp_ch])
+                    neigh_con = neigh_con + sorted(self.Q[temp_ch])
+    
                 for n in Channel:
-                    self.datamatrix[1, n] = sorted(rn.sample(list(self.I__flat), q_in_conn))
-                    self.datamatrix[2, n] = sorted(rn.sample(list(self.Q__flat), q_ne_conn))
+                    self.datamatrix[1, n] = input_con
+                    self.datamatrix[2, n] = neigh_con
                     self.datamatrix[3, n] = sorted(self.C__flat)
                     self.datamatrix[4, n] = n - sum(self.q)
-                    
+                ch += 1
+                col += 1 
+                if ch % dimensions == 0:
+                    row += 1
+                    col = 0
+    
+            ch = 0
+            row = 0
+            col = 0
             for Channel in self.Z:
+                neighbour_indices = nearest_points(row, col, ax, dg, size=(dimensions, dimensions))
+                input_con = sorted(self.I[ch]) + sorted(self.Q[ch])
+                neigh_con = sorted(Channel)
+                for index in neighbour_indices:
+                    temp_ch = int((dimensions*index[0]) + index[1])  
+                    input_con = input_con + sorted(self.I[temp_ch]) + sorted(self.Q[temp_ch])
+                    neigh_con = neigh_con + sorted(self.Z[temp_ch])
+    
                 for n in Channel:
-                    self.datamatrix[1, n] = sorted(rn.sample(list(self.Q__flat), z_in_conn))
-                    self.datamatrix[2, n] = sorted(rn.sample(list(self.Z__flat), z_ne_conn))
+                    self.datamatrix[1, n] = input_con
+                    self.datamatrix[2, n] = neigh_con
                     self.datamatrix[3, n] = sorted(self.C__flat)
-                    self.datamatrix[4, n] = n
+                    self.datamatrix[4, n] = n - sum(self.q)
+                ch += 1
+                col += 1 
+                if ch % dimensions == 0:
+                    row += 1
+                    col = 0
                 
             for Channel in self.C:
                 for n in Channel:
                     self.datamatrix[3, n] = sorted(self.Q__flat) + sorted(self.Z__flat)
                     
-            self.datamatrix_type = "rand_conn "+str(q_in_conn)+"-"+str(q_ne_conn)+"--"+str(z_in_conn)+"-"+str(z_ne_conn)
-            
-
-            
+            self.datamatrix_type = 'nearest_neighbour_conn'
