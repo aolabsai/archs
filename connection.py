@@ -23,7 +23,7 @@ def nearest_points(row, col, ax, dg, size = (30,30)):
     if ax > 0:
         temp_row = row
         temp_col = col + 1
-        while temp_col <= size[1]:
+        while temp_col <= size[1]-1:
             points.append((temp_row, temp_col))
             if (temp_col - col) == ax:
                 break
@@ -43,7 +43,7 @@ def nearest_points(row, col, ax, dg, size = (30,30)):
     if ax > 0:
         temp_row = row + 1
         temp_col = col
-        while temp_row <= size[0]:
+        while temp_row <= size[0]-1:
             points.append((temp_row, temp_col))
             if (temp_row - row) == ax:
                 break
@@ -64,7 +64,7 @@ def nearest_points(row, col, ax, dg, size = (30,30)):
     if dg > 0:
         temp_row = row - 1
         temp_col = col + 1
-        while temp_row >= 0 and temp_col <= size[1]:
+        while temp_row >= 0 and temp_col <= size[1]-1:
             points.append((temp_row, temp_col))
             if (row - temp_row) == dg:
                 break
@@ -75,7 +75,7 @@ def nearest_points(row, col, ax, dg, size = (30,30)):
     if dg > 0:
         temp_row = row + 1
         temp_col = col - 1
-        while temp_row <= size[0] and temp_col >= 0:
+        while temp_row <= size[0]-1 and temp_col >= 0:
             points.append((temp_row, temp_col))
             if (temp_row - row) == dg:
                 break
@@ -86,7 +86,7 @@ def nearest_points(row, col, ax, dg, size = (30,30)):
     if dg > 0:
         temp_row = row + 1
         temp_col = col + 1
-        while temp_row <= size[0] and temp_col <= size[1]:
+        while temp_row <= size[0]-1 and temp_col <= size[1]-1:
             points.append((temp_row, temp_col))
             if (temp_row - row) == dg:
                 break
