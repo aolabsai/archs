@@ -233,31 +233,33 @@ class Arch(object):
 
         if self.connector_function == "nearest_neighbour_conn":    
             """Define how many neurons you want along axes (ax) and along diagonals (dg) for the connection"""
+            "Works for non square matrix as well"
             
-            ax = 3
-            dg = 2
+            ax = int(self.connector_parameters[0])
+            dg = int(self.connector_parameters[1])
+            neurons_x = int(self.connector_parameters[2])
+            neurons_y = int(self.connector_parameters[3])
+            Z2I_connections = self.connector_parameters[4]  #True or False
             ch = 0
             row = 0
             col = 0
-            total = len(self.Q)
-            dimensions = int(np.sqrt(total))
             for Channel in self.Q:
-                neighbour_indices = nearest_points(row, col, ax, dg, size=(dimensions, dimensions))
+                neighbour_indices = nearest_points(row, col, ax, dg, size=(neurons_x, neurons_y))
                 input_con = sorted(self.I[ch])
                 neigh_con = sorted(Channel)
                 for index in neighbour_indices:
-                    temp_ch = int((dimensions*index[0]) + index[1]) 
+                    temp_ch = int(( (neurons_x)*index[0] ) + index[1]) 
                     input_con = input_con + sorted(self.I[temp_ch])
                     neigh_con = neigh_con + sorted(self.Q[temp_ch])
 
                 for n in Channel:
-                    self.datamatrix[1, n] = input_con
-                    self.datamatrix[2, n] = neigh_con
+                    self.datamatrix[1, n] = sorted(input_con)
+                    self.datamatrix[2, n] = sorted(neigh_con)
                     self.datamatrix[3, n] = sorted(self.C__flat)
                     self.datamatrix[4, n] = n - sum(self.q)
                 ch += 1
                 col += 1 
-                if ch%dimensions == 0:
+                if ch%(neurons_x) == 0:
                     row += 1
                     col = 0
 
@@ -265,17 +267,17 @@ class Arch(object):
             row = 0
             col = 0
             for Channel in self.Z:
-                neighbour_indices = nearest_points(row, col, ax, dg, size=(dimensions, dimensions))
-                input_con = sorted(self.I[ch])+ sorted(self.Q[ch])
+                neighbour_indices = nearest_points(row, col, ax, dg, size=(neurons_x, neurons_y))
+                input_con = (sorted(self.I[ch]) if Z2I_connections else [])+ sorted(self.Q[ch])
                 neigh_con = sorted(Channel)
                 for index in neighbour_indices:
-                    temp_ch = int((dimensions*index[0]) + index[1])  
-                    input_con = input_con + sorted(self.I[temp_ch]) + sorted(self.Q[temp_ch])
+                    temp_ch = int(( (neurons_x)*index[0] ) + index[1])    
+                    input_con = input_con + (sorted(self.I[temp_ch]) if Z2I_connections else []) + sorted(self.Q[temp_ch])
                     neigh_con = neigh_con + sorted(self.Z[temp_ch])
 
                 for n in Channel:
-                    self.datamatrix[1, n] = input_con
-                    self.datamatrix[2, n] = neigh_con
+                    self.datamatrix[1, n] = sorted(input_con)
+                    self.datamatrix[2, n] = sorted(neigh_con)
                     self.datamatrix[3, n] = sorted(self.C__flat)
                     self.datamatrix[4, n] = n - sum(self.q)
                 ch += 1
