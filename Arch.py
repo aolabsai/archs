@@ -31,7 +31,7 @@ Thank you for your curiosity!
 ##############################################################################
 
 # Arch Class
-
+from functions import nearest_points
 # 3rd Party Modules
 import numpy as np
 import random as rn
@@ -168,7 +168,7 @@ class Arch(object):
     
     
         if self.connector_function == "forward_forward_conn":    
-            """fully connect the neurons forward only-- Q channel to *corresponding* I and itself; Z channel to all Q and itself"""
+            """Fully connect the neurons forward only-- Q channel to *corresponding* I and itself; Z channel to all Q and itself"""
         
             ci = 0
             for Channel in self.Q:
@@ -228,4 +228,71 @@ class Arch(object):
             self.datamatrix_type = "rand_conn "+str(q_in_conn)+"-"+str(q_ne_conn)+"--"+str(z_in_conn)+"-"+str(z_ne_conn)
             
 
+        if self.connector_function == "nearest_neighbour_conn":    
+            """Connects channels of neurons in a grid to their nearest neighbors (channels)-- choose how far the connections go along both axis (ax) and along diagonals (dg).
             
+            Keyword arguments:
+            ax -- int of how many neighbors to connect to along x-y axis
+            dg -- int of how many neighbors to connect to diagonally
+            neurons_x -- int of X-dimension of grid
+            neurons_y -- int of Y-dimension of grid
+            Z2I_connections -- boolean, for if Z is connected to corresponding I
+            """
+            
+            ax = int(self.connector_parameters[0])
+            dg = int(self.connector_parameters[1])
+            neurons_x = int(self.connector_parameters[2])
+            neurons_y = int(self.connector_parameters[3])
+            Z2I_connections = self.connector_parameters[4]  #True or False
+
+            ch = 0
+            row = 0
+            col = 0
+            for Channel in self.Q:
+                neighbour_indices = nearest_points(row, col, ax, dg, size=(neurons_x, neurons_y))
+                input_con = sorted(self.I[ch])
+                neigh_con = sorted(Channel)
+                for index in neighbour_indices:
+                    temp_ch = int(( (neurons_x)*index[0] ) + index[1]) 
+                    input_con = input_con + sorted(self.I[temp_ch])
+                    neigh_con = neigh_con + sorted(self.Q[temp_ch])
+
+                for n in Channel:
+                    self.datamatrix[1, n] = sorted(input_con)
+                    self.datamatrix[2, n] = sorted(neigh_con)
+                    self.datamatrix[3, n] = sorted(self.C__flat)
+                    self.datamatrix[4, n] = n - sum(self.q)
+                ch += 1
+                col += 1 
+                if ch%(neurons_x) == 0:
+                    row += 1
+                    col = 0
+
+            ch = 0
+            row = 0
+            col = 0
+            for Channel in self.Z:
+                neighbour_indices = nearest_points(row, col, ax, dg, size=(neurons_x, neurons_y))
+                input_con = (sorted(self.I[ch]) if Z2I_connections else [])+ sorted(self.Q[ch])
+                neigh_con = sorted(Channel)
+                for index in neighbour_indices:
+                    temp_ch = int(( (neurons_x)*index[0] ) + index[1])    
+                    input_con = input_con + (sorted(self.I[temp_ch]) if Z2I_connections else []) + sorted(self.Q[temp_ch])
+                    neigh_con = neigh_con + sorted(self.Z[temp_ch])
+
+                for n in Channel:
+                    self.datamatrix[1, n] = sorted(input_con)
+                    self.datamatrix[2, n] = sorted(neigh_con)
+                    self.datamatrix[3, n] = sorted(self.C__flat)
+                    self.datamatrix[4, n] = n - sum(self.q)
+                ch += 1
+                col += 1 
+                if ch%(neurons_x) == 0:
+                    row += 1
+                    col = 0
+                
+            for Channel in self.C:
+                for n in Channel:
+                    self.datamatrix[3, n] = sorted(self.Q__flat) + sorted(self.Z__flat)
+                    
+                self.datamatrix_type = 'nearest_neighbour_conn'
