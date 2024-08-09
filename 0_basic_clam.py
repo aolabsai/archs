@@ -13,7 +13,7 @@ Thank you for your curiosity!
 # For interactive visual representation of this Arch:
 #    https://miro.com/app/board/uXjVM_kESvI=/?share_link_id=72701488535
 #
-# Cutomize and upload this Arch to our API to create Agents: https://docs.aolabs.ai/reference/kennelcreate
+# Customize and upload this Arch to our API to create Agents: https://docs.aolabs.ai/reference/kennelcreate
 #
 
 

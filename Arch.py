@@ -31,7 +31,7 @@ Thank you for your curiosity!
 ##############################################################################
 
 # Arch Class
-from connection import nearest_points
+from functions import nearest_points
 # 3rd Party Modules
 import numpy as np
 import random as rn
@@ -168,7 +168,7 @@ class Arch(object):
     
     
         if self.connector_function == "forward_forward_conn":    
-            """fully connect the neurons forward only-- Q channel to *corresponding* I and itself; Z channel to all Q and itself"""
+            """Fully connect the neurons forward only-- Q channel to *corresponding* I and itself; Z channel to all Q and itself"""
         
             ci = 0
             for Channel in self.Q:
@@ -228,18 +228,23 @@ class Arch(object):
             self.datamatrix_type = "rand_conn "+str(q_in_conn)+"-"+str(q_ne_conn)+"--"+str(z_in_conn)+"-"+str(z_ne_conn)
             
 
-            
-        
-
         if self.connector_function == "nearest_neighbour_conn":    
-            """Define how many neurons you want along axes (ax) and along diagonals (dg) for the connection"""
-            "Works for non square matrix as well"
+            """Connects channels of neurons in a grid to their nearest neighbors (channels)-- choose how far the connections go along both axis (ax) and along diagonals (dg).
+            
+            Keyword arguments:
+            ax -- int of how many neighbors to connect to along x-y axis
+            dg -- int of how many neighbors to connect to diagonally
+            neurons_x -- int of X-dimension of grid
+            neurons_y -- int of Y-dimension of grid
+            Z2I_connections -- boolean, for if Z is connected to corresponding I
+            """
             
             ax = int(self.connector_parameters[0])
             dg = int(self.connector_parameters[1])
             neurons_x = int(self.connector_parameters[2])
             neurons_y = int(self.connector_parameters[3])
             Z2I_connections = self.connector_parameters[4]  #True or False
+
             ch = 0
             row = 0
             col = 0
@@ -282,7 +287,7 @@ class Arch(object):
                     self.datamatrix[4, n] = n - sum(self.q)
                 ch += 1
                 col += 1 
-                if ch%dimensions == 0:
+                if ch%(neurons_x) == 0:
                     row += 1
                     col = 0
                 
